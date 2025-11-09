@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Universe Explorer - All Cosmic Animations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #000000;
+            overflow: hidden;
+            color: #FFFFFF;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Navigation Bar */
+        #nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 181, 201, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-tab {
+            background: linear-gradient(135deg, rgba(0, 181, 201, 0.1), rgba(0, 181, 201, 0.05));
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            color: #00D9F5;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex: 1;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .nav-tab:hover {
+            background: linear-gradient(135deg, rgba(0, 181, 201, 0.2), rgba(0, 181, 201, 0.1));
+            border-color: rgba(0, 181, 201, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 181, 201, 0.3);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #00B5C9, #0095A8);
+            border-color: #00D9F5;
+            color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(0, 181, 201, 0.5);
+        }
+
+        /* Animation Containers */
+        .animation-container {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .animation-container.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .animation-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00D9F5;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 0 20px rgba(0, 217, 245, 0.8);
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            #nav-bar {
+                height: 50px;
+                gap: 4px;
+                padding: 0 8px;
+            }
+
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 12px;
+                max-width: none;
+                border-radius: 8px;
+            }
+
+            .animation-container {
+                top: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-tab {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+
+            .nav-tab span {
+                display: none;
+            }
+
+            .nav-tab::before {
+                content: attr(data-short);
+            }
+        }
+
+        /* Info Badge */
+        .info-badge {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0, 181, 201, 0.2);
+            border: 1px solid rgba(0, 181, 201, 0.4);
+            color: #00D9F5;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-badge::before {
+            content: "ℹ️";
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .info-badge {
+                bottom: 10px;
+                right: 10px;
+                font-size: 10px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="nav-bar">
+        <button class="nav-tab active" data-view="cosmic-timeline" data-short="🌌 Timeline">
+            <span>🌌 Cosmic Timeline</span>
+        </button>
+        <button class="nav-tab" data-view="universe-planets" data-short="🪐 Universe">
+            <span>🪐 Universe & Planets</span>
+        </button>
+        <button class="nav-tab" data-view="black-hole" data-short="⚫ Black Hole">
+            <span>⚫ Black Hole</span>
+        </button>
+    </div>
+
+    <!-- Animation Containers -->
+    <div id="cosmic-timeline" class="animation-container active">
+        <div class="loading show">Loading Cosmic Timeline...</div>
+        <iframe class="animation-frame" src="cosmic-timeline-Cursor_Grok_revised.html"></iframe>
+    </div>
+
+    <div id="universe-planets" class="animation-container">
+        <div class="loading">Loading Universe & Planets...</div>
+        <iframe class="animation-frame" src="universe-and-planets.html"></iframe>
+    </div>
+
+    <div id="black-hole" class="animation-container">
+        <div class="loading">Loading Black Hole...</div>
+        <iframe class="animation-frame" src="blackhole_1.html"></iframe>
+    </div>
+
+    <!-- Info Badge -->
+    <div class="info-badge">Tap tabs to switch views</div>
+
+    <script>
+        // Tab switching functionality
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const containers = document.querySelectorAll('.animation-container');
+        const loadingIndicators = document.querySelectorAll('.loading');
+        const iframes = document.querySelectorAll('.animation-frame');
+
+        // Track loaded iframes
+        const loadedFrames = new Set();
+
+        // Hide loading indicators when iframes load
+        iframes.forEach((iframe, index) => {
+            iframe.addEventListener('load', () => {
+                loadedFrames.add(iframe);
+                const loadingElement = iframe.previousElementSibling;
+                if (loadingElement && loadingElement.classList.contains('loading')) {
+                    loadingElement.classList.remove('show');
+                }
+            });
+        });
+
+        // Tab click handler
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const viewId = tab.dataset.view;
+
+                // Update active tab
+                navTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update active container
+                containers.forEach(container => {
+                    if (container.id === viewId) {
+                        container.classList.add('active');
+
+                        // Show loading indicator if iframe hasn't loaded yet
+                        const iframe = container.querySelector('.animation-frame');
+                        const loading = container.querySelector('.loading');
+                        if (iframe && !loadedFrames.has(iframe) && loading) {
+                            loading.classList.add('show');
+                        }
+                    } else {
+                        container.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Hide info badge after 5 seconds
+        setTimeout(() => {
+            const infoBadge = document.querySelector('.info-badge');
+            if (infoBadge) {
+                infoBadge.style.opacity = '0';
+                infoBadge.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => infoBadge.style.display = 'none', 500);
+            }
+        }, 5000);
+
+        // Keyboard navigation (desktop)
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '3') {
+                const index = parseInt(e.key) - 1;
+                if (navTabs[index]) {
+                    navTabs[index].click();
+                }
+            }
+        });
+
+        // Prevent double-tap zoom on iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Handle orientation change
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // Ensure proper viewport on mobile
+        window.addEventListener('resize', () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        });
+
+        // Initialize viewport height
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    </script>
+</body>
+</html>
