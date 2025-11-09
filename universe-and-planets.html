@@ -637,8 +637,9 @@
             z-index: 200;
             transform: translateY(100%);
             transition: transform 0.3s ease;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .info-panel-mobile.active {
@@ -683,12 +684,31 @@
         }
 
         .panel-content-mobile {
-            padding: 20px 15px;
+            padding: 20px 15px 40px 15px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .panel-content-mobile p {
             line-height: 1.6;
             margin-bottom: 15px;
+            font-size: 14px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .panel-content-mobile ul {
+            margin: 10px 0 20px 20px;
+            padding-left: 0;
+        }
+
+        .panel-content-mobile li {
+            margin: 8px 0;
+            line-height: 1.5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .info-grid-mobile {
@@ -704,12 +724,15 @@
             background: var(--bg-tertiary);
             border-radius: 8px;
             border-left: 3px solid var(--accent-primary);
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .info-label-mobile {
             color: var(--text-secondary);
             font-size: 13px;
             font-weight: 500;
+            flex-shrink: 0;
         }
 
         .info-value-mobile {
@@ -717,6 +740,10 @@
             font-size: 13px;
             font-weight: 600;
             text-align: right;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            flex: 1;
+            min-width: 0;
         }
 
         /* Chat Interface - Solar System */
@@ -1055,6 +1082,34 @@
             .time-display {
                 font-size: 13px;
                 min-width: 160px;
+            }
+
+            .panel-header-mobile h2 {
+                font-size: 18px;
+            }
+
+            .panel-content-mobile {
+                padding: 15px 12px 50px 12px;
+                font-size: 13px;
+            }
+
+            .panel-content-mobile p {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            .info-label-mobile,
+            .info-value-mobile {
+                font-size: 12px;
+            }
+
+            .panel-content-mobile h4 {
+                font-size: 14px;
+            }
+
+            .panel-content-mobile li {
+                font-size: 12px;
+                line-height: 1.4;
             }
         }
 
