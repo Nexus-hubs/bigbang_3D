@@ -599,105 +599,111 @@
 
                 this.stopAll();
 
-                // Very soft, ambient, relaxing tones for each epoch
+                // Melodic, relaxing tones using A minor pentatonic scale (A, C, D, E, G)
+                // Each epoch has harmonious chord progressions
                 if (epochTime < 0.5) {
-                    // Quantum - gentle high shimmer
-                    const noise = this.createNoise(0.008, 3000);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
-                    }
+                    // Quantum - ethereal high tones (A4 + E5 chord)
+                    const tone1 = this.createOscillator(440, 'sine', 0.004); // A4
+                    const tone2 = this.createOscillator(659.25, 'sine', 0.003); // E5
+                    const pad = this.createNoise(0.004, 3500);
 
-                    const shimmer = this.createOscillator(880, 'sine', 0.003);
-                    if (shimmer) {
-                        shimmer.oscillator.start();
-                        this.currentOscillators.push(shimmer);
+                    [tone1, tone2].forEach(osc => {
+                        if (osc) {
+                            osc.oscillator.start();
+                            this.currentOscillators.push(osc);
+                        }
+                    });
+                    if (pad) {
+                        pad.noise.start();
+                        this.currentNoises.push(pad);
                     }
                 }
                 else if (epochTime < 8) {
-                    // Inflation - deep calm drone
-                    const drone = this.createOscillator(65.41, 'sine', 0.012);
-                    if (drone) {
-                        drone.oscillator.start();
-                        this.currentOscillators.push(drone);
-                    }
+                    // Inflation - deep peaceful foundation (A2 + C3)
+                    const bass = this.createOscillator(110, 'sine', 0.010); // A2
+                    const harmony = this.createOscillator(130.81, 'sine', 0.008); // C3
+                    const pad = this.createNoise(0.003, 400);
 
-                    const noise = this.createNoise(0.006, 400);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
+                    [bass, harmony].forEach(osc => {
+                        if (osc) {
+                            osc.oscillator.start();
+                            this.currentOscillators.push(osc);
+                        }
+                    });
+                    if (pad) {
+                        pad.noise.start();
+                        this.currentNoises.push(pad);
                     }
                 }
                 else if (epochTime < 15) {
-                    // CMB - warm gentle pad
-                    const noise = this.createNoise(0.008, 1200);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
-                    }
+                    // CMB - warm meditative pad (C3 + E3 + G3)
+                    const root = this.createOscillator(130.81, 'sine', 0.008); // C3
+                    const third = this.createOscillator(164.81, 'sine', 0.006); // E3
+                    const fifth = this.createOscillator(196, 'sine', 0.005); // G3
 
-                    const warm = this.createOscillator(130.81, 'sine', 0.008);
-                    if (warm) {
-                        warm.oscillator.start();
-                        this.currentOscillators.push(warm);
-                    }
+                    [root, third, fifth].forEach(osc => {
+                        if (osc) {
+                            osc.oscillator.start();
+                            this.currentOscillators.push(osc);
+                        }
+                    });
                 }
                 else if (epochTime < 30) {
-                    // Dark Ages - minimal peaceful void
-                    const noise = this.createNoise(0.005, 300);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
-                    }
+                    // Dark Ages - minimal space (A2 + D3)
+                    const low = this.createOscillator(110, 'sine', 0.009); // A2
+                    const mid = this.createOscillator(146.83, 'sine', 0.006); // D3
+                    const ambience = this.createNoise(0.003, 300);
 
-                    const void1 = this.createOscillator(55.00, 'sine', 0.010);
-                    if (void1) {
-                        void1.oscillator.start();
-                        this.currentOscillators.push(void1);
+                    [low, mid].forEach(osc => {
+                        if (osc) {
+                            osc.oscillator.start();
+                            this.currentOscillators.push(osc);
+                        }
+                    });
+                    if (ambience) {
+                        ambience.noise.start();
+                        this.currentNoises.push(ambience);
                     }
                 }
                 else if (epochTime < 50) {
-                    // First Stars - soft twinkling
-                    const sparkle1 = this.createOscillator(523.25, 'sine', 0.004);
-                    const sparkle2 = this.createOscillator(659.25, 'sine', 0.003);
+                    // First Stars - gentle celestial melody (C4 + E4 + G4)
+                    const melody1 = this.createOscillator(261.63, 'sine', 0.006); // C4
+                    const melody2 = this.createOscillator(329.63, 'sine', 0.005); // E4
+                    const melody3 = this.createOscillator(392, 'sine', 0.004); // G4
+                    const bass = this.createOscillator(130.81, 'sine', 0.007); // C3
 
-                    [sparkle1, sparkle2].forEach(osc => {
+                    [melody1, melody2, melody3, bass].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
                             this.currentOscillators.push(osc);
                         }
                     });
-
-                    const base = this.createOscillator(130.81, 'sine', 0.006);
-                    if (base) {
-                        base.oscillator.start();
-                        this.currentOscillators.push(base);
-                    }
                 }
                 else if (epochTime < 70) {
-                    // Galaxies - flowing calm
-                    const noise = this.createNoise(0.007, 1000);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
-                    }
+                    // Galaxies - flowing harmony (D3 + A3 + D4)
+                    const flow1 = this.createOscillator(146.83, 'sine', 0.007); // D3
+                    const flow2 = this.createOscillator(220, 'sine', 0.006); // A3
+                    const flow3 = this.createOscillator(293.66, 'sine', 0.005); // D4
+                    const pad = this.createNoise(0.004, 1200);
 
-                    const flow1 = this.createOscillator(146.83, 'sine', 0.006);
-                    const flow2 = this.createOscillator(220.00, 'sine', 0.005);
-
-                    [flow1, flow2].forEach(osc => {
+                    [flow1, flow2, flow3].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
                             this.currentOscillators.push(osc);
                         }
                     });
+                    if (pad) {
+                        pad.noise.start();
+                        this.currentNoises.push(pad);
+                    }
                 }
                 else if (epochTime < 85) {
-                    // Solar System - gentle harmonics
-                    const planet1 = this.createOscillator(110.00, 'sine', 0.007);
-                    const planet2 = this.createOscillator(164.81, 'sine', 0.005);
+                    // Solar System - bright hopeful (A3 + C4 + E4)
+                    const bright1 = this.createOscillator(220, 'sine', 0.007); // A3
+                    const bright2 = this.createOscillator(261.63, 'sine', 0.006); // C4
+                    const bright3 = this.createOscillator(329.63, 'sine', 0.005); // E4
 
-                    [planet1, planet2].forEach(osc => {
+                    [bright1, bright2, bright3].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
                             this.currentOscillators.push(osc);
@@ -705,22 +711,23 @@
                     });
                 }
                 else {
-                    // Present - serene peace
-                    const noise = this.createNoise(0.006, 1500);
-                    if (noise) {
-                        noise.noise.start();
-                        this.currentNoises.push(noise);
-                    }
+                    // Present - peaceful resolution (A3 + C4 + E4 + G4)
+                    const present1 = this.createOscillator(220, 'sine', 0.007); // A3
+                    const present2 = this.createOscillator(261.63, 'sine', 0.006); // C4
+                    const present3 = this.createOscillator(329.63, 'sine', 0.005); // E4
+                    const present4 = this.createOscillator(392, 'sine', 0.004); // G4
+                    const pad = this.createNoise(0.003, 1500);
 
-                    const present1 = this.createOscillator(220.00, 'sine', 0.006);
-                    const present2 = this.createOscillator(329.63, 'sine', 0.004);
-
-                    [present1, present2].forEach(osc => {
+                    [present1, present2, present3, present4].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
                             this.currentOscillators.push(osc);
                         }
                     });
+                    if (pad) {
+                        pad.noise.start();
+                        this.currentNoises.push(pad);
+                    }
                 }
             }
 
@@ -1410,7 +1417,7 @@
             animationTime += 0.01;
 
             if (isPlaying) {
-                currentTime += 0.04;
+                currentTime += 0.015; // Slowed down from 0.04 for better readability
                 if (currentTime > 100) {
                     currentTime = 100;
                     isPlaying = false;
