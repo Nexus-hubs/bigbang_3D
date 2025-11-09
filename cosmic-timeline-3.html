@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Cosmic Timeline - Interactive 3D Journey</title>
     <style>
         * {
@@ -16,7 +16,6 @@
             background: #000000;
             overflow: hidden;
             color: #FFFFFF;
-            touch-action: none;
         }
 
         #canvas-container {
@@ -25,44 +24,44 @@
             position: relative;
         }
 
-        /* Controls - Responsive */
+        /* Controls - Compact and Responsive */
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 15, 25, 0.97);
-            padding: 15px 20px;
-            border-radius: 20px;
-            border: 2px solid rgba(0, 181, 201, 0.4);
-            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 20, 0.85);
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            backdrop-filter: blur(15px);
             z-index: 100;
-            width: calc(100% - 40px);
-            max-width: 700px;
-            box-shadow: 0 8px 32px rgba(0, 181, 201, 0.2);
+            width: calc(100% - 30px);
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         #timeline-slider {
             width: 100%;
-            height: 8px;
+            height: 6px;
             -webkit-appearance: none;
             appearance: none;
             background: linear-gradient(to right, #1a1a2e 0%, #00B5C9 var(--slider-value, 0%), #1a1a2e var(--slider-value, 0%));
             outline: none;
-            border-radius: 4px;
-            margin: 15px 0;
+            border-radius: 3px;
+            margin: 10px 0;
             cursor: pointer;
         }
 
         #timeline-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             background: linear-gradient(135deg, #00B5C9, #00D9F5);
             cursor: grab;
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0, 181, 201, 0.8), 0 0 40px rgba(0, 181, 201, 0.4);
+            box-shadow: 0 0 15px rgba(0, 181, 201, 0.6);
             transition: transform 0.2s;
         }
 
@@ -72,20 +71,20 @@
         }
 
         #timeline-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             background: linear-gradient(135deg, #00B5C9, #00D9F5);
             cursor: grab;
             border-radius: 50%;
             border: none;
-            box-shadow: 0 0 20px rgba(0, 181, 201, 0.8);
+            box-shadow: 0 0 15px rgba(0, 181, 201, 0.6);
         }
 
         .control-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
         }
 
@@ -93,20 +92,20 @@
             background: linear-gradient(135deg, #00B5C9, #0095A8);
             color: #FFFFFF;
             border: none;
-            padding: 10px 18px;
-            border-radius: 12px;
+            padding: 8px 14px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 181, 201, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 181, 201, 0.2);
             white-space: nowrap;
         }
 
         button:hover {
             background: linear-gradient(135deg, #00D9F5, #00B5C9);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 181, 201, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 181, 201, 0.4);
         }
 
         button:active {
@@ -116,86 +115,87 @@
         .time-display {
             text-align: center;
             color: #00D9F5;
-            font-size: 15px;
+            font-size: 11px;
             font-weight: 600;
-            margin-top: 10px;
-            text-shadow: 0 0 10px rgba(0, 217, 245, 0.5);
+            margin-top: 6px;
+            text-shadow: 0 0 8px rgba(0, 217, 245, 0.4);
         }
 
-        /* Info Panel - Left Side */
+        /* Compact Info Panels */
         #info-panel {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(15, 15, 25, 0.97);
-            padding: 20px;
-            border-radius: 16px;
-            border: 2px solid rgba(0, 181, 201, 0.4);
-            backdrop-filter: blur(20px);
-            max-width: 320px;
+            top: 15px;
+            left: 15px;
+            background: rgba(10, 10, 20, 0.75);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 181, 201, 0.25);
+            backdrop-filter: blur(15px);
+            max-width: 220px;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 181, 201, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         #info-panel h2 {
             color: #00D9F5;
-            margin-bottom: 12px;
-            font-size: 22px;
-            text-shadow: 0 0 10px rgba(0, 217, 245, 0.5);
+            margin-bottom: 6px;
+            font-size: 14px;
+            text-shadow: 0 0 8px rgba(0, 217, 245, 0.4);
         }
 
         #info-panel p {
-            color: #E8E8E8;
-            line-height: 1.7;
-            font-size: 14px;
+            color: #C8C8C8;
+            line-height: 1.4;
+            font-size: 11px;
         }
 
-        /* Detailed Info Panel - Right Side */
+        /* Compact Detailed Info Panel */
         #detailed-info-panel {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(15, 15, 25, 0.97);
-            padding: 20px;
-            border-radius: 16px;
-            border: 2px solid rgba(0, 181, 201, 0.4);
-            backdrop-filter: blur(20px);
-            max-width: 350px;
-            max-height: calc(100vh - 180px);
+            top: 15px;
+            right: 15px;
+            background: rgba(10, 10, 20, 0.75);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 181, 201, 0.25);
+            backdrop-filter: blur(15px);
+            max-width: 240px;
+            max-height: 280px;
             overflow-y: auto;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 181, 201, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         #detailed-info-panel h3 {
             color: #00D9F5;
-            margin-bottom: 10px;
-            font-size: 18px;
-            text-shadow: 0 0 10px rgba(0, 217, 245, 0.5);
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-shadow: 0 0 8px rgba(0, 217, 245, 0.4);
         }
 
         .info-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(0, 181, 201, 0.2);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 181, 201, 0.15);
         }
 
         .info-section:last-child {
             border-bottom: none;
+            margin-bottom: 0;
         }
 
         .info-section h4 {
             color: #00B5C9;
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 11px;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .info-section p {
-            color: #C0C0C0;
-            font-size: 13px;
-            line-height: 1.6;
+            color: #B0B0B0;
+            font-size: 10px;
+            line-height: 1.4;
         }
 
         .info-list {
@@ -204,11 +204,12 @@
         }
 
         .info-list li {
-            color: #B0B0B0;
-            font-size: 12px;
-            line-height: 1.8;
-            padding-left: 15px;
+            color: #A0A0A0;
+            font-size: 9px;
+            line-height: 1.5;
+            padding-left: 12px;
             position: relative;
+            margin-bottom: 2px;
         }
 
         .info-list li:before {
@@ -216,27 +217,28 @@
             position: absolute;
             left: 0;
             color: #00B5C9;
+            font-size: 10px;
         }
 
-        /* Instructions - Mobile Friendly */
+        /* Instructions - Compact */
         #instructions {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(15, 15, 25, 0.97);
-            padding: 12px 15px;
-            border-radius: 16px;
-            border: 2px solid rgba(0, 181, 201, 0.4);
-            backdrop-filter: blur(20px);
-            font-size: 12px;
-            color: #E8E8E8;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(10, 10, 20, 0.75);
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 181, 201, 0.25);
+            backdrop-filter: blur(15px);
+            font-size: 10px;
+            color: #C8C8C8;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 181, 201, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         #instructions div {
-            margin: 4px 0;
-            line-height: 1.4;
+            margin: 3px 0;
+            line-height: 1.3;
         }
 
         .loading {
@@ -245,157 +247,189 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #00D9F5;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
-            text-shadow: 0 0 20px rgba(0, 217, 245, 0.8);
+            text-shadow: 0 0 15px rgba(0, 217, 245, 0.6);
         }
 
         .sound-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0, 181, 201, 0.3);
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 181, 201, 0.2);
         }
 
         .volume-control {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex: 1;
         }
 
         #volume-slider {
             flex: 1;
-            height: 5px;
+            height: 4px;
             -webkit-appearance: none;
             appearance: none;
             background: #1a1a2e;
             outline: none;
-            border-radius: 3px;
+            border-radius: 2px;
             cursor: pointer;
         }
 
         #volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             background: linear-gradient(135deg, #00B5C9, #00D9F5);
             cursor: pointer;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 181, 201, 0.6);
+            box-shadow: 0 0 8px rgba(0, 181, 201, 0.5);
         }
 
         #volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             background: linear-gradient(135deg, #00B5C9, #00D9F5);
             cursor: pointer;
             border-radius: 50%;
             border: none;
-            box-shadow: 0 0 10px rgba(0, 181, 201, 0.6);
+            box-shadow: 0 0 8px rgba(0, 181, 201, 0.5);
         }
 
         .sound-indicator {
             color: #00D9F5;
-            font-size: 11px;
-            min-width: 100px;
+            font-size: 9px;
+            min-width: 70px;
             text-align: right;
         }
 
         /* Scrollbar Styling */
         #detailed-info-panel::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
         }
 
         #detailed-info-panel::-webkit-scrollbar-track {
-            background: rgba(26, 26, 46, 0.5);
-            border-radius: 4px;
+            background: rgba(26, 26, 46, 0.3);
+            border-radius: 2px;
         }
 
         #detailed-info-panel::-webkit-scrollbar-thumb {
-            background: rgba(0, 181, 201, 0.5);
-            border-radius: 4px;
+            background: rgba(0, 181, 201, 0.4);
+            border-radius: 2px;
         }
 
         #detailed-info-panel::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 181, 201, 0.7);
+            background: rgba(0, 181, 201, 0.6);
         }
 
         /* Mobile Responsive Design */
         @media (max-width: 768px) {
             #info-panel {
-                max-width: 280px;
-                padding: 15px;
-                top: 15px;
-                left: 15px;
+                max-width: 160px;
+                padding: 10px;
+                top: 10px;
+                left: 10px;
             }
 
             #info-panel h2 {
-                font-size: 18px;
-            }
-
-            #info-panel p {
-                font-size: 13px;
-            }
-
-            #detailed-info-panel {
-                max-width: 280px;
-                padding: 15px;
-                top: 15px;
-                right: 15px;
-                max-height: calc(100vh - 220px);
-            }
-
-            #controls {
-                bottom: 15px;
-                width: calc(100% - 30px);
-                padding: 12px 15px;
-            }
-
-            .control-buttons {
-                gap: 8px;
-            }
-
-            button {
-                padding: 8px 12px;
                 font-size: 12px;
             }
 
+            #info-panel p {
+                font-size: 10px;
+            }
+
+            #detailed-info-panel {
+                max-width: 170px;
+                padding: 10px;
+                top: 10px;
+                right: 10px;
+                max-height: 200px;
+            }
+
+            #detailed-info-panel h3 {
+                font-size: 11px;
+            }
+
+            .info-section h4 {
+                font-size: 10px;
+            }
+
+            .info-section p {
+                font-size: 9px;
+            }
+
+            .info-list li {
+                font-size: 8px;
+            }
+
+            #controls {
+                bottom: 10px;
+                width: calc(100% - 20px);
+                padding: 8px 12px;
+            }
+
+            .control-buttons {
+                gap: 6px;
+            }
+
+            button {
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+
             #instructions {
-                display: none; /* Hide on mobile to reduce clutter */
+                display: none;
             }
 
             .time-display {
-                font-size: 13px;
+                font-size: 10px;
+            }
+
+            .sound-indicator {
+                font-size: 8px;
+                min-width: 60px;
             }
         }
 
         @media (max-width: 480px) {
-            #info-panel, #detailed-info-panel {
-                max-width: calc(100vw - 30px);
-                left: 15px;
-                right: auto;
+            #info-panel {
+                max-width: 140px;
+                padding: 8px;
+            }
+
+            #info-panel h2 {
+                font-size: 11px;
+            }
+
+            #info-panel p {
+                font-size: 9px;
             }
 
             #detailed-info-panel {
-                top: auto;
-                bottom: 150px;
-                max-height: 200px;
+                max-width: 150px;
+                padding: 8px;
+                max-height: 160px;
+            }
+
+            #detailed-info-panel h3 {
+                font-size: 10px;
             }
 
             button {
-                padding: 8px 10px;
-                font-size: 11px;
+                padding: 6px 8px;
+                font-size: 10px;
             }
         }
 
         /* Touch device optimization */
         @media (hover: none) and (pointer: coarse) {
             button {
-                min-height: 44px; /* iOS tap target recommendation */
+                min-height: 36px;
             }
         }
     </style>
@@ -407,38 +441,36 @@
 
     <div id="info-panel">
         <h2 id="epoch-title">Big Bang</h2>
-        <p id="epoch-description">The beginning of space, time, and everything we know.</p>
+        <p id="epoch-description">The beginning of space, time, and everything.</p>
     </div>
 
     <div id="detailed-info-panel">
-        <h3>Cosmic Insights</h3>
+        <h3>Details</h3>
         <div id="detailed-content">
             <div class="info-section">
-                <h4>Current Epoch</h4>
-                <p id="detailed-epoch-info">Beginning of the universe from a singularity of infinite density and temperature.</p>
+                <h4>About</h4>
+                <p id="detailed-epoch-info">Infinite density singularity that gave birth to our universe.</p>
             </div>
             <div class="info-section">
                 <h4>Key Facts</h4>
                 <ul class="info-list" id="key-facts">
-                    <li>All matter and energy originated from this point</li>
+                    <li>All matter and energy originated here</li>
                     <li>Space itself began expanding</li>
                     <li>Time started at this moment</li>
                 </ul>
             </div>
             <div class="info-section">
-                <h4>What Happened Next</h4>
-                <p id="next-events">The universe rapidly expanded and cooled, leading to the formation of fundamental particles.</p>
+                <h4>What's Next</h4>
+                <p id="next-events">Rapid expansion and cooling of the universe.</p>
             </div>
         </div>
     </div>
 
     <div id="instructions">
         <div><strong style="color: #00D9F5;">Controls:</strong></div>
-        <div>🖱️ Drag to rotate view</div>
-        <div>🔄 Scroll to zoom</div>
-        <div>⏯️ Use controls below</div>
-        <div>🔊 Melodic soundscapes</div>
-        <div>🪐 Orbiting planets</div>
+        <div>🖱️ Drag to rotate</div>
+        <div>🔄 Scroll/Pinch zoom</div>
+        <div>🔊 Relaxing ambient</div>
     </div>
 
     <div id="controls">
@@ -454,7 +486,7 @@
         <div class="sound-controls">
             <div class="volume-control">
                 <span style="color: #00B5C9;">🔉</span>
-                <input type="range" id="volume-slider" min="0" max="100" value="40" step="1">
+                <input type="range" id="volume-slider" min="0" max="100" value="25" step="1">
                 <span style="color: #00D9F5;">🔊</span>
             </div>
             <span class="sound-indicator" id="sound-indicator">Ambient: Off</span>
@@ -463,7 +495,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ============ ENHANCED MELODIC SOUND SYSTEM ============
+        // ============ RELAXING AMBIENT SOUND SYSTEM ============
         class CosmicSoundEngine {
             constructor() {
                 this.audioContext = null;
@@ -472,19 +504,7 @@
                 this.currentNoises = [];
                 this.isInitialized = false;
                 this.isMuted = true;
-                this.volume = 0.4;
-
-                // Musical scales for more melodic sounds
-                this.scales = {
-                    // Pentatonic scale (peaceful, no dissonance)
-                    pentatonic: [261.63, 293.66, 329.63, 392.00, 440.00], // C, D, E, G, A
-                    // Major scale intervals
-                    major: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88], // C major
-                    // Ambient chord progressions
-                    cosmicChord1: [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
-                    cosmicChord2: [146.83, 185.00, 220.00, 277.18], // D3, F#3, A3, C#4
-                    cosmicChord3: [174.61, 220.00, 261.63, 329.63], // F3, A3, C4, E4
-                };
+                this.volume = 0.25; // Much quieter default
             }
 
             initialize() {
@@ -501,7 +521,7 @@
                 }
             }
 
-            createOscillator(frequency, type = 'sine', gain = 0.1, detune = 0) {
+            createOscillator(frequency, type = 'sine', gain = 0.02) {
                 if (!this.isInitialized) return null;
 
                 const osc = this.audioContext.createOscillator();
@@ -509,25 +529,18 @@
 
                 osc.type = type;
                 osc.frequency.value = frequency;
-                osc.detune.value = detune;
-                oscGain.gain.value = gain;
+                oscGain.gain.value = 0;
 
-                // Add subtle vibrato for warmth
-                const vibrato = this.audioContext.createOscillator();
-                const vibratoGain = this.audioContext.createGain();
-                vibrato.frequency.value = 3; // 3Hz vibrato
-                vibratoGain.gain.value = 2; // Subtle depth
-
-                vibrato.connect(vibratoGain);
-                vibratoGain.connect(osc.detune);
+                // Very gentle fade in
+                oscGain.gain.setTargetAtTime(gain, this.audioContext.currentTime, 2.0);
 
                 osc.connect(oscGain);
                 oscGain.connect(this.masterGain);
 
-                return { oscillator: osc, gain: oscGain, vibrato, vibratoGain };
+                return { oscillator: osc, gain: oscGain };
             }
 
-            createNoise(gain = 0.05, filterFreq = 1000) {
+            createNoise(gain = 0.015, filterFreq = 800) {
                 if (!this.isInitialized) return null;
 
                 const bufferSize = 2 * this.audioContext.sampleRate;
@@ -543,12 +556,13 @@
                 noise.loop = true;
 
                 const noiseGain = this.audioContext.createGain();
-                noiseGain.gain.value = gain;
+                noiseGain.gain.value = 0;
+                noiseGain.gain.setTargetAtTime(gain, this.audioContext.currentTime, 2.0);
 
                 const filter = this.audioContext.createBiquadFilter();
                 filter.type = 'lowpass';
                 filter.frequency.value = filterFreq;
-                filter.Q.value = 8;
+                filter.Q.value = 1;
 
                 noise.connect(filter);
                 filter.connect(noiseGain);
@@ -560,13 +574,18 @@
             stopAll() {
                 this.currentOscillators.forEach(item => {
                     try {
-                        if (item.vibrato) item.vibrato.stop();
-                        item.oscillator.stop();
+                        item.gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.5);
+                        setTimeout(() => {
+                            try { item.oscillator.stop(); } catch (e) {}
+                        }, 1000);
                     } catch (e) {}
                 });
                 this.currentNoises.forEach(item => {
                     try {
-                        item.noise.stop();
+                        item.gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.5);
+                        setTimeout(() => {
+                            try { item.noise.stop(); } catch (e) {}
+                        }, 1000);
                     } catch (e) {}
                 });
                 this.currentOscillators = [];
@@ -578,190 +597,125 @@
 
                 this.stopAll();
 
-                // Quantum Fluctuations (0-0.5%) - Ethereal high frequencies
+                // Very soft, ambient, relaxing tones for each epoch
                 if (epochTime < 0.5) {
-                    const noise = this.createNoise(0.025, 4000);
+                    // Quantum - gentle high shimmer
+                    const noise = this.createNoise(0.008, 3000);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
 
-                    // Crystalline high tones using pentatonic scale
-                    [1046.50, 1174.66, 1318.51].forEach((freq, i) => {
-                        const osc = this.createOscillator(freq, 'sine', 0.008 - i * 0.001);
-                        if (osc) {
-                            osc.oscillator.start();
-                            osc.vibrato.start();
-                            this.currentOscillators.push(osc);
-                        }
-                    });
+                    const shimmer = this.createOscillator(880, 'sine', 0.003);
+                    if (shimmer) {
+                        shimmer.oscillator.start();
+                        this.currentOscillators.push(shimmer);
+                    }
                 }
-                // Inflation (0.5-8%) - Deep resonant bass with harmonics
                 else if (epochTime < 8) {
-                    // Fundamental drone with perfect fifth harmony
-                    const fundamentals = [
-                        { freq: 65.41, gain: 0.06 },  // C2
-                        { freq: 98.00, gain: 0.04 },  // G2 (perfect fifth)
-                        { freq: 130.81, gain: 0.03 }  // C3 (octave)
-                    ];
+                    // Inflation - deep calm drone
+                    const drone = this.createOscillator(65.41, 'sine', 0.012);
+                    if (drone) {
+                        drone.oscillator.start();
+                        this.currentOscillators.push(drone);
+                    }
 
-                    fundamentals.forEach(tone => {
-                        const osc = this.createOscillator(tone.freq, 'sine', tone.gain);
-                        if (osc) {
-                            osc.oscillator.start();
-                            osc.vibrato.start();
-                            this.currentOscillators.push(osc);
-                        }
-                    });
-
-                    const noise = this.createNoise(0.015, 600);
+                    const noise = this.createNoise(0.006, 400);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
                 }
-                // CMB / Afterglow (8-15%) - Warm ambient pad
                 else if (epochTime < 15) {
-                    const noise = this.createNoise(0.02, 1500);
+                    // CMB - warm gentle pad
+                    const noise = this.createNoise(0.008, 1200);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
 
-                    // Warm major chord - C major seventh
-                    const warmChord = [
-                        { freq: 130.81, gain: 0.025 }, // C3
-                        { freq: 164.81, gain: 0.020 }, // E3
-                        { freq: 196.00, gain: 0.018 }, // G3
-                        { freq: 246.94, gain: 0.015 }  // B3
-                    ];
-
-                    warmChord.forEach(note => {
-                        const osc = this.createOscillator(note.freq, 'sine', note.gain);
-                        if (osc) {
-                            osc.oscillator.start();
-                            osc.vibrato.start();
-                            this.currentOscillators.push(osc);
-                        }
-                    });
+                    const warm = this.createOscillator(130.81, 'sine', 0.008);
+                    if (warm) {
+                        warm.oscillator.start();
+                        this.currentOscillators.push(warm);
+                    }
                 }
-                // Dark Ages (15-30%) - Minimal, meditative
                 else if (epochTime < 30) {
-                    const noise = this.createNoise(0.012, 400);
+                    // Dark Ages - minimal peaceful void
+                    const noise = this.createNoise(0.005, 300);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
 
-                    // Very low sustained tone with harmonic
-                    const darkTones = [
-                        { freq: 55.00, gain: 0.04 },  // A1
-                        { freq: 82.41, gain: 0.025 }  // E2 (perfect fifth)
-                    ];
-
-                    darkTones.forEach(tone => {
-                        const osc = this.createOscillator(tone.freq, 'sine', tone.gain);
-                        if (osc) {
-                            osc.oscillator.start();
-                            osc.vibrato.start();
-                            this.currentOscillators.push(osc);
-                        }
-                    });
+                    const void1 = this.createOscillator(55.00, 'sine', 0.010);
+                    if (void1) {
+                        void1.oscillator.start();
+                        this.currentOscillators.push(void1);
+                    }
                 }
-                // First Stars (30-50%) - Bright, twinkling major scale
                 else if (epochTime < 50) {
-                    // Bright major pentatonic melody
-                    const starTones = [
-                        { freq: 523.25, gain: 0.015 }, // C5
-                        { freq: 587.33, gain: 0.013 }, // D5
-                        { freq: 659.25, gain: 0.012 }, // E5
-                        { freq: 783.99, gain: 0.010 }  // G5
-                    ];
+                    // First Stars - soft twinkling
+                    const sparkle1 = this.createOscillator(523.25, 'sine', 0.004);
+                    const sparkle2 = this.createOscillator(659.25, 'sine', 0.003);
 
-                    starTones.forEach(tone => {
-                        const osc = this.createOscillator(tone.freq, 'sine', tone.gain);
+                    [sparkle1, sparkle2].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
-                            osc.vibrato.start();
                             this.currentOscillators.push(osc);
                         }
                     });
 
-                    // Gentle bass foundation
-                    const bass = this.createOscillator(130.81, 'sine', 0.025); // C3
-                    if (bass) {
-                        bass.oscillator.start();
-                        bass.vibrato.start();
-                        this.currentOscillators.push(bass);
+                    const base = this.createOscillator(130.81, 'sine', 0.006);
+                    if (base) {
+                        base.oscillator.start();
+                        this.currentOscillators.push(base);
                     }
                 }
-                // Galaxy Formation (50-70%) - Flowing D minor chord
                 else if (epochTime < 70) {
-                    const noise = this.createNoise(0.018, 1200);
+                    // Galaxies - flowing calm
+                    const noise = this.createNoise(0.007, 1000);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
 
-                    // D minor seventh chord (contemplative)
-                    const galaxyChord = [
-                        { freq: 146.83, gain: 0.022 }, // D3
-                        { freq: 174.61, gain: 0.019 }, // F3
-                        { freq: 220.00, gain: 0.017 }, // A3
-                        { freq: 261.63, gain: 0.014 }  // C4
-                    ];
+                    const flow1 = this.createOscillator(146.83, 'sine', 0.006);
+                    const flow2 = this.createOscillator(220.00, 'sine', 0.005);
 
-                    galaxyChord.forEach(note => {
-                        const osc = this.createOscillator(note.freq, 'sine', note.gain);
+                    [flow1, flow2].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
-                            osc.vibrato.start();
                             this.currentOscillators.push(osc);
                         }
                     });
                 }
-                // Solar System (70-85%) - Harmonic planetary tones
                 else if (epochTime < 85) {
-                    // A major chord with extensions
-                    const planetaryHarmonics = [
-                        { freq: 110.00, gain: 0.024 }, // A2
-                        { freq: 138.59, gain: 0.020 }, // C#3
-                        { freq: 164.81, gain: 0.018 }, // E3
-                        { freq: 220.00, gain: 0.015 }, // A3
-                        { freq: 277.18, gain: 0.012 }  // C#4
-                    ];
+                    // Solar System - gentle harmonics
+                    const planet1 = this.createOscillator(110.00, 'sine', 0.007);
+                    const planet2 = this.createOscillator(164.81, 'sine', 0.005);
 
-                    planetaryHarmonics.forEach(tone => {
-                        const osc = this.createOscillator(tone.freq, 'sine', tone.gain);
+                    [planet1, planet2].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
-                            osc.vibrato.start();
                             this.currentOscillators.push(osc);
                         }
                     });
                 }
-                // Present Day (85-100%) - Complex, rich harmony
                 else {
-                    const noise = this.createNoise(0.015, 1800);
+                    // Present - serene peace
+                    const noise = this.createNoise(0.006, 1500);
                     if (noise) {
                         noise.noise.start();
                         this.currentNoises.push(noise);
                     }
 
-                    // E major ninth chord (uplifting, complete)
-                    const presentChord = [
-                        { freq: 164.81, gain: 0.022 }, // E3
-                        { freq: 207.65, gain: 0.019 }, // G#3
-                        { freq: 246.94, gain: 0.017 }, // B3
-                        { freq: 329.63, gain: 0.015 }, // E4
-                        { freq: 369.99, gain: 0.012 }  // F#4 (9th)
-                    ];
+                    const present1 = this.createOscillator(220.00, 'sine', 0.006);
+                    const present2 = this.createOscillator(329.63, 'sine', 0.004);
 
-                    presentChord.forEach(note => {
-                        const osc = this.createOscillator(note.freq, 'sine', note.gain);
+                    [present1, present2].forEach(osc => {
                         if (osc) {
                             osc.oscillator.start();
-                            osc.vibrato.start();
                             this.currentOscillators.push(osc);
                         }
                     });
@@ -771,7 +725,7 @@
             setVolume(value) {
                 this.volume = value;
                 if (this.masterGain && !this.isMuted) {
-                    this.masterGain.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.1);
+                    this.masterGain.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.3);
                 }
             }
 
@@ -779,7 +733,7 @@
                 this.isMuted = !this.isMuted;
                 if (this.masterGain) {
                     const targetValue = this.isMuted ? 0 : this.volume;
-                    this.masterGain.gain.setTargetAtTime(targetValue, this.audioContext.currentTime, 0.1);
+                    this.masterGain.gain.setTargetAtTime(targetValue, this.audioContext.currentTime, 0.3);
                 }
                 return this.isMuted;
             }
@@ -787,122 +741,122 @@
 
         const soundEngine = new CosmicSoundEngine();
 
-        // ============ ENHANCED EPOCH DATA WITH DETAILED INFO ============
+        // ============ ENHANCED EPOCH DATA WITH RECENT DISCOVERIES ============
         const epochsDetailedData = {
             0: {
                 title: "Quantum Fluctuations",
                 description: "The Planck epoch - quantum foam of spacetime.",
-                detailedInfo: "At the very beginning, the universe existed as a quantum singularity where space and time were not yet distinct. Quantum fluctuations at the Planck scale gave birth to the universe.",
+                detailedInfo: "Universe existed as quantum singularity. Quantum fluctuations at Planck scale gave birth to everything.",
                 facts: [
                     "Temperature: ~10³² Kelvin",
-                    "All four fundamental forces unified",
-                    "Gravity separates from other forces",
-                    "Quantum effects dominate spacetime"
+                    "All forces unified",
+                    "Gravity separates first",
+                    "Quantum spacetime effects"
                 ],
-                nextEvents: "The universe will undergo exponential inflation, expanding faster than the speed of light."
+                nextEvents: "Universe will undergo exponential inflation."
             },
             0.5: {
                 title: "Inflation",
                 description: "Exponential expansion of the universe.",
-                detailedInfo: "In a fraction of a second, the universe expanded by a factor of at least 10²⁶, smoothing out irregularities and explaining the universe's uniformity.",
+                detailedInfo: "In 10⁻³² seconds, universe expanded by factor of 10²⁶, smoothing irregularities.",
                 facts: [
-                    "Duration: 10⁻³⁶ to 10⁻³² seconds",
-                    "Universe expands faster than light",
-                    "Creates quantum fluctuations that seed galaxies",
-                    "Explains cosmic flatness and uniformity"
+                    "Duration: 10⁻³⁶ to 10⁻³² sec",
+                    "Faster than light expansion",
+                    "Seeds future galaxies",
+                    "Explains cosmic flatness"
                 ],
-                nextEvents: "After inflation, the universe enters a hot, dense state filled with elementary particles and radiation."
+                nextEvents: "Hot, dense state with elementary particles forms."
             },
             8: {
-                title: "Afterglow Light Pattern",
-                description: "Cosmic microwave background radiation becomes visible.",
-                detailedInfo: "Electrons combine with nuclei to form atoms, making the universe transparent. Light from this era has been traveling through space for 13.8 billion years, now visible as microwave radiation.",
+                title: "Afterglow Light",
+                description: "Cosmic microwave background radiation visible.",
+                detailedInfo: "Electrons combine with nuclei forming atoms. Universe becomes transparent. CMB light travels 13.8 billion years.",
                 facts: [
                     "Age: ~375,000 years",
-                    "Temperature: ~3,000 Kelvin",
-                    "First atoms (hydrogen, helium) form",
-                    "Universe becomes transparent to light",
-                    "CMB now detected at 2.7 Kelvin"
+                    "Temp: ~3,000 Kelvin",
+                    "First atoms form (H, He)",
+                    "Universe transparent now",
+                    "CMB: 2.7 Kelvin today"
                 ],
-                nextEvents: "The universe enters a dark age with no light sources, only neutral hydrogen gas."
+                nextEvents: "Universe enters dark age with no light sources."
             },
             15: {
                 title: "Dark Ages",
-                description: "No stars yet - universe filled with neutral hydrogen.",
-                detailedInfo: "A period of darkness between the CMB and first stars. The universe expanded and cooled, filled only with neutral hydrogen and helium gas, invisible in the darkness.",
+                description: "No stars - only neutral hydrogen.",
+                detailedInfo: "Period of darkness between CMB and first stars. Only neutral hydrogen and helium gas exists.",
                 facts: [
-                    "Duration: 400,000 to 400 million years",
-                    "No light sources exist",
-                    "Dark matter begins forming structures",
-                    "Hydrogen gas cools and accumulates",
-                    "Seeds of future galaxies take shape"
+                    "Duration: 400K-400M years",
+                    "No light sources",
+                    "Dark matter structures form",
+                    "Hydrogen cools down",
+                    "Galaxy seeds form"
                 ],
-                nextEvents: "Gravity pulls hydrogen into dense clouds that will ignite as the first stars."
+                nextEvents: "Gravity pulls hydrogen into first star clouds."
             },
             30: {
                 title: "First Stars",
-                description: "First generation of stars ignite.",
-                detailedInfo: "Population III stars - massive, short-lived, and composed only of hydrogen and helium. These stellar furnaces forged the first heavy elements through nuclear fusion.",
+                description: "First generation stars ignite.",
+                detailedInfo: "Population III stars - massive, short-lived. Made only H and He. Forged first heavy elements.",
                 facts: [
                     "Age: ~400 million years",
-                    "Stars 100-1000x mass of our Sun",
+                    "Stars 100-1000× Sun mass",
                     "No heavy elements yet",
-                    "Created first carbon, oxygen, iron",
-                    "Ended darkness with ultraviolet light"
+                    "Created C, O, Fe",
+                    "UV light ends darkness"
                 ],
-                nextEvents: "These massive stars will explode as supernovae, seeding space with heavy elements needed for planets and life."
+                nextEvents: "Supernovae seed space with heavy elements."
             },
             50: {
                 title: "Galaxy Formation",
-                description: "Galaxies begin to form and cluster.",
-                detailedInfo: "Dark matter halos attracted gas and stars, forming the first galaxies. These early galaxies were smaller and more chaotic than modern ones, often colliding and merging.",
+                description: "Galaxies begin forming and clustering.",
+                detailedInfo: "Dark matter halos attract gas and stars. Early galaxies smaller, chaotic, often merging. JWST found record galaxy JADES-GS-z14-0.",
                 facts: [
                     "Age: ~1 billion years",
-                    "First spiral and elliptical galaxies",
-                    "Supermassive black holes appear",
-                    "Galaxies cluster under gravity",
-                    "Heavy elements become abundant"
+                    "First spirals & ellipticals",
+                    "Supermassive black holes",
+                    "JWST sees 290M years old",
+                    "Heavy elements abundant"
                 ],
-                nextEvents: "Galaxies continue growing through mergers and star formation, creating the cosmic web structure."
+                nextEvents: "Galaxies grow through mergers and star formation."
             },
             70: {
-                title: "Solar System Birth",
+                title: "Solar System",
                 description: "Our solar system forms from nebular cloud.",
-                detailedInfo: "A cloud of gas and dust collapsed under gravity, forming our Sun and planets. Rocky planets formed close to the Sun, while gas giants formed farther out where ice could exist.",
+                detailedInfo: "Gas and dust cloud collapsed under gravity. Rocky planets close to Sun, gas giants farther out.",
                 facts: [
-                    "Age: ~9 billion years (4.6 billion years ago)",
-                    "Formed from supernova debris",
-                    "Sun contains 99.86% of system mass",
-                    "8 planets, dwarf planets, asteroids",
-                    "Earth formed in habitable zone"
+                    "Age: 9B yrs (4.6B yrs ago)",
+                    "From supernova debris",
+                    "Sun: 99.86% system mass",
+                    "8 planets + dwarf planets",
+                    "Earth in habitable zone"
                 ],
-                nextEvents: "Planets continue forming and migrating. Life will emerge on Earth in the next billion years."
+                nextEvents: "Life emerges on Earth in next billion years."
             },
             85: {
                 title: "Dark Energy Era",
                 description: "Dark energy dominates, accelerating expansion.",
-                detailedInfo: "Around 5 billion years ago, dark energy began driving accelerated cosmic expansion. The universe's expansion started speeding up rather than slowing down as expected.",
+                detailedInfo: "5B years ago, dark energy began driving accelerated expansion. Universe's expansion speeds up. DESI mapped 6M galaxies.",
                 facts: [
                     "Age: ~10 billion years",
-                    "Dark energy: ~68% of universe",
+                    "Dark energy: ~68%",
                     "Expansion accelerates",
-                    "Galaxies moving apart faster",
-                    "Universe will expand forever"
+                    "May be weakening (2024)",
+                    "Einstein's theory holds"
                 ],
-                nextEvents: "The universe will continue expanding, becoming colder and more diffuse over trillions of years."
+                nextEvents: "Universe expands forever, becoming colder."
             },
             100: {
                 title: "Present Day",
-                description: "Current era - age of observation and understanding.",
-                detailedInfo: "We live 13.77 billion years after the Big Bang, in a universe of 2 trillion galaxies. Humanity has developed technology to observe the cosmic microwave background and peer back to the dawn of time.",
+                description: "Age of observation and understanding.",
+                detailedInfo: "13.77B years after Big Bang. 2 trillion galaxies. JWST reveals earliest galaxies. Fastest-feeding black holes found 2024.",
                 facts: [
                     "Age: 13.77 billion years",
-                    "~2 trillion galaxies observable",
-                    "Humans evolved on Earth",
-                    "We can observe to 380,000 years after Big Bang",
-                    "Universe continues accelerating"
+                    "~2 trillion galaxies",
+                    "Humans on Earth",
+                    "JWST breaks records",
+                    "New black holes found"
                 ],
-                nextEvents: "Stars will continue forming for trillions of years, followed by an era of slowly dying stars and black holes."
+                nextEvents: "Stars form for trillions more years."
             }
         };
 
@@ -917,34 +871,29 @@
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit for performance
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // Remove loading screen
         document.querySelector('.loading').remove();
 
-        // Cosmic epochs data
         const epochs = [
             { name: "Quantum Fluctuations", time: 0, years: "10⁻⁴³ seconds", position: 0, color: 0xFFFFFF, dataKey: 0 },
             { name: "Inflation", time: 0.5, years: "10⁻³⁶ to 10⁻³² seconds", position: 10, color: 0xFFEFD5, dataKey: 0.5 },
-            { name: "Afterglow Light Pattern", time: 8, years: "375,000 years", position: 80, color: 0xFF8C42, dataKey: 8 },
-            { name: "Dark Ages", time: 15, years: "400,000 - 400M years", position: 150, color: 0x2A2A4A, dataKey: 15 },
+            { name: "Afterglow Light", time: 8, years: "375,000 years", position: 80, color: 0xFF8C42, dataKey: 8 },
+            { name: "Dark Ages", time: 15, years: "400K - 400M years", position: 150, color: 0x2A2A4A, dataKey: 15 },
             { name: "First Stars", time: 30, years: "~400 million years", position: 300, color: 0xFFD700, dataKey: 30 },
             { name: "Galaxy Formation", time: 50, years: "~1 billion years", position: 500, color: 0x6495ED, dataKey: 50 },
-            { name: "Solar System Birth", time: 70, years: "~9 billion years", position: 700, color: 0xFF6B35, dataKey: 70 },
+            { name: "Solar System", time: 70, years: "~9 billion years", position: 700, color: 0xFF6B35, dataKey: 70 },
             { name: "Dark Energy Era", time: 85, years: "~10 billion years", position: 850, color: 0x9B59B6, dataKey: 85 },
             { name: "Present Day", time: 100, years: "13.77 billion years", position: 1000, color: 0x00D9F5, dataKey: 100 }
         ];
 
-        // Create enhanced universe cone
         const createUniverseCone = () => {
             const group = new THREE.Group();
 
-            // Main cone representing expanding universe
             const segments = 64;
             const geometry = new THREE.ConeGeometry(450, 1000, segments, 50, true);
 
-            // Enhanced gradient material
             const material = new THREE.ShaderMaterial({
                 vertexShader: `
                     varying vec2 vUv;
@@ -963,10 +912,10 @@
                     void main() {
                         float gradient = vPosition.y / 500.0 + 0.5;
 
-                        vec3 color1 = vec3(1.0, 1.0, 1.0); // White (early universe)
-                        vec3 color2 = vec3(1.0, 0.55, 0.26); // Orange (CMB)
-                        vec3 color3 = vec3(0.16, 0.16, 0.29); // Dark blue (dark ages)
-                        vec3 color4 = vec3(0.0, 0.85, 0.96); // Cyan (present)
+                        vec3 color1 = vec3(1.0, 1.0, 1.0);
+                        vec3 color2 = vec3(1.0, 0.55, 0.26);
+                        vec3 color3 = vec3(0.16, 0.16, 0.29);
+                        vec3 color4 = vec3(0.0, 0.85, 0.96);
 
                         vec3 color;
                         if (gradient < 0.08) {
@@ -977,15 +926,12 @@
                             color = mix(color3, color4, (gradient - 0.25) / 0.75);
                         }
 
-                        // Enhanced noise for texture
                         float noise = fract(sin(dot(vUv * 100.0 + time * 0.1, vec2(12.9898, 78.233))) * 43758.5453);
                         color += noise * 0.03;
 
-                        // Shimmer effect
                         float shimmer = sin(time + vPosition.y * 0.1) * 0.02 + 0.98;
                         color *= shimmer;
 
-                        // Enhanced transparency gradient
                         float alpha = 0.5 + gradient * 0.4;
 
                         gl_FragColor = vec4(color, alpha);
@@ -1005,7 +951,6 @@
             group.add(cone);
             group.userData.coneMaterial = material;
 
-            // Enhanced wireframe overlay
             const wireframeGeo = new THREE.ConeGeometry(453, 1000, 32, 20, true);
             const wireframeMat = new THREE.MeshBasicMaterial({
                 color: 0x00D9F5,
@@ -1017,7 +962,6 @@
             wireframe.rotation.x = -Math.PI / 2;
             group.add(wireframe);
 
-            // Enhanced particles for stars/galaxies
             const particlesGeometry = new THREE.BufferGeometry();
             const particlesCount = 6000;
             const positions = new Float32Array(particlesCount * 3);
@@ -1034,25 +978,20 @@
                 positions[i * 3 + 1] = y;
                 positions[i * 3 + 2] = Math.sin(angle) * radius * (0.9 + Math.random() * 0.2);
 
-                // Enhanced color distribution
                 if (t < 0.15) {
-                    // Early universe - dark/dim
                     colors[i * 3] = 0.15;
                     colors[i * 3 + 1] = 0.15;
                     colors[i * 3 + 2] = 0.25;
                 } else if (t < 0.5) {
-                    // Mid universe - warm colors
                     colors[i * 3] = 0.6 + Math.random() * 0.4;
                     colors[i * 3 + 1] = 0.4 + Math.random() * 0.3;
                     colors[i * 3 + 2] = 0.2 + Math.random() * 0.2;
                 } else {
-                    // Recent universe - bright varied colors
                     colors[i * 3] = 0.5 + Math.random() * 0.5;
                     colors[i * 3 + 1] = 0.5 + Math.random() * 0.5;
                     colors[i * 3 + 2] = 0.5 + Math.random() * 0.5;
                 }
 
-                // Enhanced size variation
                 sizes[i] = Math.random() * 4 + 0.5;
             }
 
@@ -1060,7 +999,6 @@
             particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
             particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-            // Enhanced particle texture
             const canvas = document.createElement('canvas');
             canvas.width = 64;
             canvas.height = 64;
@@ -1098,7 +1036,6 @@
         const universeCone = createUniverseCone();
         scene.add(universeCone);
 
-        // Add epoch markers in 3D space
         const markerGroup = new THREE.Group();
         let labelsVisible = true;
 
@@ -1106,7 +1043,6 @@
             const yPos = (epoch.time / 100 * 1000) - 500;
             const radius = (epoch.time / 100) * 450;
 
-            // Enhanced marker sphere
             const markerGeo = new THREE.SphereGeometry(8, 32, 32);
             const markerMat = new THREE.MeshBasicMaterial({
                 color: epoch.color,
@@ -1117,7 +1053,6 @@
             marker.position.set(radius, yPos, 0);
             markerGroup.add(marker);
 
-            // Enhanced ring
             const ringGeo = new THREE.RingGeometry(10, 13, 32);
             const ringMat = new THREE.MeshBasicMaterial({
                 color: 0x00D9F5,
@@ -1131,7 +1066,6 @@
             ring.rotation.x = Math.PI / 2;
             markerGroup.add(ring);
 
-            // Enhanced glow
             const glowGeo = new THREE.SphereGeometry(14, 32, 32);
             const glowMat = new THREE.MeshBasicMaterial({
                 color: epoch.color,
@@ -1144,7 +1078,6 @@
             markerGroup.add(glow);
         });
 
-        // Enhanced planets for solar system
         const solarSystemY = (70 / 100 * 1000) - 500;
         const solarSystemRadius = (70 / 100) * 450;
 
@@ -1180,7 +1113,6 @@
             };
             markerGroup.add(planet);
 
-            // Enhanced planet glow
             const planetGlowGeo = new THREE.SphereGeometry(pData.size * 1.5, 32, 32);
             const planetGlowMat = new THREE.MeshBasicMaterial({
                 color: pData.color,
@@ -1196,7 +1128,6 @@
 
         scene.add(markerGroup);
 
-        // Enhanced lighting
         const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
         scene.add(ambientLight);
 
@@ -1208,12 +1139,15 @@
         pointLight2.position.set(0, -500, -500);
         scene.add(pointLight2);
 
-        // Mouse and touch controls
+        // Mouse and touch controls with pinch-to-zoom
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let rotation = { x: 0, y: 0 };
 
-        // Mouse events
+        // Pinch zoom variables
+        let initialPinchDistance = 0;
+        let initialCameraZ = 400;
+
         renderer.domElement.addEventListener('mousedown', (e) => {
             isDragging = true;
             previousMousePosition = { x: e.clientX, y: e.clientY };
@@ -1237,19 +1171,27 @@
             isDragging = false;
         });
 
-        // Touch events for mobile
         let touchStartPos = { x: 0, y: 0 };
 
         renderer.domElement.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDragging = true;
-            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }, { passive: false });
+            if (e.touches.length === 1) {
+                isDragging = true;
+                touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            } else if (e.touches.length === 2) {
+                // Pinch zoom start
+                isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+                initialCameraZ = camera.position.z;
+            }
+        });
 
         renderer.domElement.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (isDragging && e.touches.length === 1) {
+
+            if (e.touches.length === 1 && isDragging) {
                 const deltaX = e.touches[0].clientX - previousMousePosition.x;
                 const deltaY = e.touches[0].clientY - previousMousePosition.y;
 
@@ -1259,15 +1201,29 @@
                 rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x));
 
                 previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            } else if (e.touches.length === 2) {
+                // Pinch zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                const scale = initialPinchDistance / distance;
+                camera.position.z = initialCameraZ * scale;
+                camera.position.z = Math.max(200, Math.min(900, camera.position.z));
             }
         }, { passive: false });
 
         renderer.domElement.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isDragging = false;
-        }, { passive: false });
+            if (e.touches.length < 2) {
+                isDragging = false;
+            }
+            if (e.touches.length === 1) {
+                // One finger still down, reinitialize for dragging
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        });
 
-        // Zoom with wheel and pinch
         renderer.domElement.addEventListener('wheel', (e) => {
             e.preventDefault();
             const delta = e.deltaY * 0.5;
@@ -1275,7 +1231,6 @@
             camera.position.z = Math.max(200, Math.min(900, camera.position.z));
         }, { passive: false });
 
-        // Animation controls
         let isPlaying = false;
         let currentTime = 0;
         const timeSlider = document.getElementById('timeline-slider');
@@ -1285,19 +1240,16 @@
         const resetBtn = document.getElementById('reset-btn');
         const toggleLabelsBtn = document.getElementById('toggle-labels-btn');
 
-        // Sound controls
         const muteBtn = document.getElementById('mute-btn');
         const volumeSlider = document.getElementById('volume-slider');
         const soundIndicator = document.getElementById('sound-indicator');
 
-        // Initialize with moderate volume
-        soundEngine.volume = 0.4;
-        volumeSlider.value = 40;
+        soundEngine.volume = 0.25;
+        volumeSlider.value = 25;
 
         let lastEpochPlayed = -1;
 
-        // UI sound effect helper
-        function playUISound(frequency = 523.25, duration = 0.06) {
+        function playUISound(frequency = 440, duration = 0.03) {
             if (!soundEngine.isInitialized) return;
             const ctx = soundEngine.audioContext;
             const osc = ctx.createOscillator();
@@ -1305,7 +1257,7 @@
 
             osc.frequency.value = frequency;
             osc.type = 'sine';
-            gain.gain.value = 0.025;
+            gain.gain.value = 0.01;
 
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -1358,25 +1310,21 @@
             document.getElementById('epoch-title').textContent = currentEpoch.name;
             document.getElementById('epoch-description').textContent = currentEpoch.description;
 
-            // Update detailed info panel
             updateDetailedInfo(time);
 
-            // Update time display
             if (time < 1) {
                 timeDisplay.textContent = `Time: ${currentEpoch.years}`;
             } else {
                 const years = (time / 100 * 13.77).toFixed(2);
-                timeDisplay.textContent = `Time: ${years} billion years after Big Bang`;
+                timeDisplay.textContent = `Time: ${years}B years after Big Bang`;
             }
 
-            // Update slider background gradient
             timeSlider.style.setProperty('--slider-value', `${time}%`);
 
-            // Update sound if epoch changed
             if (epochIndex !== lastEpochPlayed && soundEngine.isInitialized && !soundEngine.isMuted) {
                 lastEpochPlayed = epochIndex;
                 soundEngine.playEpochSound(time);
-                soundIndicator.textContent = `${currentEpoch.name}`;
+                soundIndicator.textContent = currentEpoch.name;
             }
         }
 
@@ -1388,12 +1336,12 @@
                     soundEngine.playEpochSound(currentTime);
                 }
             }
-            playUISound(659.25); // E5
+            playUISound(523.25);
         });
 
         pauseBtn.addEventListener('click', () => {
             isPlaying = false;
-            playUISound(523.25); // C5
+            playUISound(392);
         });
 
         resetBtn.addEventListener('click', () => {
@@ -1405,13 +1353,13 @@
             if (soundEngine.isInitialized && !soundEngine.isMuted) {
                 soundEngine.playEpochSound(0);
             }
-            playUISound(783.99); // G5
+            playUISound(659.25);
         });
 
         toggleLabelsBtn.addEventListener('click', () => {
             labelsVisible = !labelsVisible;
             markerGroup.visible = labelsVisible;
-            playUISound(587.33); // D5
+            playUISound(440);
         });
 
         muteBtn.addEventListener('click', () => {
@@ -1432,12 +1380,12 @@
                         break;
                     }
                 }
-                soundIndicator.textContent = `${currentEpoch.name}`;
-                playUISound(698.46); // F5
+                soundIndicator.textContent = currentEpoch.name;
+                playUISound(587.33);
             } else {
                 soundEngine.stopAll();
                 soundIndicator.textContent = 'Ambient: Off';
-                playUISound(349.23); // F4
+                playUISound(293.66);
             }
         });
 
@@ -1452,7 +1400,6 @@
             updateEpochInfo(currentTime);
         });
 
-        // Animation loop
         let animationFrameId;
         let animationTime = 0;
 
@@ -1477,49 +1424,40 @@
                 }
             }
 
-            // Update shader time
             if (universeCone.userData.coneMaterial) {
                 universeCone.userData.coneMaterial.uniforms.time.value = animationTime;
             }
 
-            // Rotate universe
             universeCone.rotation.y = rotation.y;
             universeCone.rotation.x = rotation.x;
 
             markerGroup.rotation.y = rotation.y;
             markerGroup.rotation.x = rotation.x;
 
-            // Animate particles with gentle rotation
             const particles = universeCone.children[2];
             if (particles && particles.isPoints) {
                 particles.rotation.y += 0.0003;
             }
 
-            // Gentle camera sway
             const time = Date.now() * 0.0001;
             camera.position.x = Math.sin(time * 0.5) * 25;
             camera.lookAt(0, 0, 0);
 
-            // Update marker glows and planets
             markerGroup.children.forEach((child, i) => {
                 if (child.isMesh) {
-                    // Animate glows with pulsing
                     if (child.geometry && child.geometry.type === 'SphereGeometry' &&
                         child.material.opacity < 0.35) {
                         child.scale.setScalar(1 + Math.sin(animationTime * 2 + i) * 0.12);
                     }
 
-                    // Animate planets in orbit
                     if (child.userData && child.userData.speed) {
                         child.userData.angle += child.userData.speed * 0.01;
                         const orbitRadius = Math.abs(child.userData.distance);
                         child.position.x = child.userData.baseRadius + Math.cos(child.userData.angle) * orbitRadius;
                         child.position.z = Math.sin(child.userData.angle) * orbitRadius;
 
-                        // Rotate planet on its axis
                         child.rotation.y += 0.01;
 
-                        // Update glow position
                         if (child.userData.glow) {
                             child.userData.glow.position.copy(child.position);
                             child.userData.glow.rotation.copy(child.rotation);
@@ -1534,7 +1472,6 @@
         animate();
         updateEpochInfo(0);
 
-        // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             if (soundEngine.isInitialized) {
                 soundEngine.stopAll();
@@ -1542,7 +1479,6 @@
             cancelAnimationFrame(animationFrameId);
         });
 
-        // Handle window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
