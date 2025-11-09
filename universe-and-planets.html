@@ -60,7 +60,7 @@
             z-index: 0;
         }
 
-        /* View switching */
+        /* View container */
         .view-container {
             position: relative;
             width: 100%;
@@ -68,27 +68,10 @@
             height: -webkit-fill-available;
         }
 
-        .view-timeline, .view-solar-system {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .view-solar-system {
+            position: relative;
             width: 100%;
             height: 100%;
-            transition: opacity 0.5s ease;
-        }
-
-        .view-timeline {
-            opacity: 1;
-        }
-
-        .view-solar-system {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .view-solar-system.active {
-            opacity: 1;
-            pointer-events: all;
         }
 
         /* Loading Screen */
@@ -919,31 +902,6 @@
             transform: scale(0.95);
         }
 
-        /* View Switcher */
-        .view-switcher {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(10, 10, 15, 0.95);
-            padding: 12px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 181, 201, 0.3);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            box-shadow: 0 8px 24px rgba(0, 181, 201, 0.15);
-            display: flex;
-            gap: 8px;
-        }
-
-        .view-switcher button {
-            padding: 8px 16px;
-            font-size: 13px;
-            min-height: 36px;
-        }
-
-        .view-switcher .active {
-            background: linear-gradient(135deg, #00D9F5, #00B5C9);
-        }
 
         .loading {
             position: absolute;
@@ -1160,70 +1118,8 @@
         </div>
     </div>
 
-    <!-- View Switcher -->
-    <div class="view-switcher">
-        <button id="timeline-view-btn" class="active">🕐 Timeline</button>
-        <button id="solar-system-view-btn">🪐 Solar System</button>
-    </div>
-
     <!-- Main Container -->
     <div class="view-container">
-        <!-- Cosmic Timeline View -->
-        <div class="view-timeline" id="timeline-view">
-            <div id="canvas-container-timeline">
-                <div class="loading">Initializing Cosmic Timeline...</div>
-            </div>
-
-            <div id="info-panel">
-                <h2 id="epoch-title">Big Bang</h2>
-                <p id="epoch-description">The beginning of space, time, and everything we know.</p>
-            </div>
-
-            <div id="detailed-info-panel">
-                <h3>Cosmic Insights</h3>
-                <div id="detailed-content">
-                    <div class="info-section">
-                        <h4>Current Epoch</h4>
-                        <p id="detailed-epoch-info">Beginning of the universe from a singularity of infinite density and temperature.</p>
-                    </div>
-                    <div class="info-section">
-                        <h4>Key Facts</h4>
-                        <ul class="info-list" id="key-facts">
-                            <li>All matter and energy originated from this point</li>
-                            <li>Space itself began expanding</li>
-                            <li>Time started at this moment</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <h4>What Happened Next</h4>
-                        <p id="next-events">The universe rapidly expanded and cooled, leading to the formation of fundamental particles.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="instructions">
-                <div class="instructions-title">Controls</div>
-                <div>🖱️ Drag to rotate view</div>
-                <div>🔄 Scroll / Pinch to zoom</div>
-                <div>⏯️ Use controls below</div>
-                <div>🪐 Planets at Solar System epoch</div>
-            </div>
-
-            <div id="controls">
-                <div class="control-row">
-                    <div class="control-buttons">
-                        <button id="play-btn">▶ Play</button>
-                        <button id="pause-btn">⏸ Pause</button>
-                        <button id="reset-btn">↻ Reset</button>
-                        <button id="toggle-labels-btn">🏷️ Labels</button>
-                        <button id="open-solar-system-btn">🪐 Solar System</button>
-                    </div>
-                    <div class="time-display" id="time-display">Time: 0 years after Big Bang</div>
-                </div>
-                <input type="range" id="timeline-slider" min="0" max="100" value="0" step="0.1">
-            </div>
-        </div>
-
         <!-- Solar System View -->
         <div class="view-solar-system" id="solar-system-view">
             <!-- Header -->
@@ -1328,282 +1224,10 @@
         // ==================== Combined Application ====================
 
         // Global variables for both views
-        let currentView = 'timeline';
-        let timelineScene, timelineCamera, timelineRenderer, timelineControls;
+        // Global variables
         let solarScene, solarCamera, solarRenderer, solarControls;
         let celestialBodies = {};
-        let timelineEpochs = [];
-        let activePlanets = [];
-        let activeGalaxies = [];
         let animationId;
-        let lastEpochPlayed = -1;
-
-        // ==================== View Switching ====================
-        function switchView(view) {
-            currentView = view;
-
-            // Update UI
-            document.getElementById('timeline-view-btn').classList.toggle('active', view === 'timeline');
-            document.getElementById('solar-system-view-btn').classList.toggle('active', view === 'solar-system');
-
-            // Switch views
-            document.getElementById('timeline-view').classList.toggle('active', view === 'solar-system');
-            document.getElementById('solar-system-view').classList.toggle('active', view === 'solar-system');
-
-            // Handle animations
-            if (view === 'solar-system') {
-                // Initialize solar system if not already done
-                if (!solarScene) {
-                    initSolarSystem();
-                }
-                // Start solar system animation
-                if (animationId) cancelAnimationFrame(animationId);
-                animateSolarSystem();
-            } else {
-                // Initialize timeline if not already done
-                if (!timelineScene) {
-                    initTimeline();
-                }
-                // Start timeline animation
-                if (animationId) cancelAnimationFrame(animationId);
-                animateTimeline();
-            }
-        }
-
-        // ==================== Cosmic Timeline Initialization ====================
-        function initTimeline() {
-            // Scene setup
-            timelineScene = new THREE.Scene();
-            timelineScene.background = new THREE.Color(0x000000);
-            timelineScene.fog = new THREE.FogExp2(0x000000, 0.0008);
-
-            // Camera setup
-            timelineCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-            timelineCamera.position.set(0, 200, 400);
-            timelineCamera.lookAt(0, 0, 0);
-
-            // Renderer setup
-            timelineRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            timelineRenderer.setSize(window.innerWidth, window.innerHeight);
-            timelineRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            document.getElementById('canvas-container-timeline').appendChild(timelineRenderer.domElement);
-
-            // Remove loading screen
-            document.querySelector('#timeline-view .loading').remove();
-
-            // Controls
-            timelineControls = new THREE.OrbitControls(timelineCamera, timelineRenderer.domElement);
-            timelineControls.enableDamping = true;
-            timelineControls.dampingFactor = 0.05;
-            timelineControls.minDistance = 200;
-            timelineControls.maxDistance = 1000;
-            timelineControls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
-
-            // Create universe
-            createUniverseCone();
-            createEpochMarkers();
-
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.4);
-            timelineScene.add(ambientLight);
-
-            const pointLight = new THREE.PointLight(0xFFFFFF, 1.5, 3000);
-            pointLight.position.set(0, 500, 500);
-            timelineScene.add(pointLight);
-
-            const pointLight2 = new THREE.PointLight(0x00D9F5, 0.8, 3000);
-            pointLight2.position.set(0, -500, -500);
-            timelineScene.add(pointLight2);
-
-            // Initialize UI
-            setupTimelineUI();
-            updateEpochInfo(0);
-            updateTimelineElements(0);
-        }
-
-        function createUniverseCone() {
-            const group = new THREE.Group();
-
-            // Main cone
-            const segments = 64;
-            const geometry = new THREE.ConeGeometry(450, 1000, segments, 50, true);
-
-            const material = new THREE.ShaderMaterial({
-                vertexShader: `
-                    varying vec2 vUv;
-                    varying vec3 vPosition;
-                    void main() {
-                        vUv = uv;
-                        vPosition = position;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform float time;
-                    varying vec2 vUv;
-                    varying vec3 vPosition;
-
-                    void main() {
-                        float gradient = vPosition.y / 500.0 + 0.5;
-
-                        vec3 color1 = vec3(1.0, 1.0, 1.0); // Early universe
-                        vec3 color2 = vec3(1.0, 0.55, 0.26); // CMB
-                        vec3 color3 = vec3(0.16, 0.16, 0.29); // Dark ages
-                        vec3 color4 = vec3(0.0, 0.85, 0.96); // Present
-
-                        vec3 color;
-                        if (gradient < 0.08) {
-                            color = mix(color1, color2, gradient / 0.08);
-                        } else if (gradient < 0.25) {
-                            color = mix(color2, color3, (gradient - 0.08) / 0.17);
-                        } else {
-                            color = mix(color3, color4, (gradient - 0.25) / 0.75);
-                        }
-
-                        float noise = fract(sin(dot(vUv * 150.0 + time * 0.05, vec2(12.9898, 78.233))) * 43758.5453);
-                        color += noise * 0.02;
-
-                        float shimmer = sin(time + vPosition.y * 0.05) * 0.01 + 0.99;
-                        color *= shimmer;
-
-                        float alpha = 0.6 + gradient * 0.3;
-
-                        gl_FragColor = vec4(color, alpha);
-                    }
-                `,
-                uniforms: { time: { value: 0 } },
-                transparent: true,
-                side: THREE.DoubleSide,
-                depthWrite: false
-            });
-
-            const cone = new THREE.Mesh(geometry, material);
-            cone.rotation.x = -Math.PI / 2;
-            cone.position.y = 0;
-            group.add(cone);
-            group.userData.coneMaterial = material;
-
-            // Wireframe
-            const wireframeGeo = new THREE.ConeGeometry(453, 1000, 32, 20, true);
-            const wireframeMat = new THREE.MeshBasicMaterial({
-                color: 0x00D9F5,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.08
-            });
-            const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
-            wireframe.rotation.x = -Math.PI / 2;
-            group.add(wireframe);
-
-            // Particles
-            const particlesGeometry = new THREE.BufferGeometry();
-            const particlesCount = 8000;
-            const positions = new Float32Array(particlesCount * 3);
-            const colors = new Float32Array(particlesCount * 3);
-            const sizes = new Float32Array(particlesCount);
-
-            for (let i = 0; i < particlesCount; i++) {
-                const t = Math.random();
-                const radius = t * 450;
-                const angle = Math.random() * Math.PI * 2;
-                const y = (t - 0.5) * 1000;
-
-                positions[i * 3] = Math.cos(angle) * radius * (0.9 + Math.random() * 0.2);
-                positions[i * 3 + 1] = y;
-                positions[i * 3 + 2] = Math.sin(angle) * radius * (0.9 + Math.random() * 0.2);
-
-                if (t < 0.15) {
-                    colors[i * 3] = 0.15; colors[i * 3 + 1] = 0.15; colors[i * 3 + 2] = 0.25;
-                } else if (t < 0.5) {
-                    colors[i * 3] = 0.6 + Math.random() * 0.4;
-                    colors[i * 3 + 1] = 0.4 + Math.random() * 0.3;
-                    colors[i * 3 + 2] = 0.2 + Math.random() * 0.2;
-                } else {
-                    colors[i * 3] = 0.5 + Math.random() * 0.5;
-                    colors[i * 3 + 1] = 0.5 + Math.random() * 0.5;
-                    colors[i * 3 + 2] = 0.5 + Math.random() * 0.5;
-                }
-
-                sizes[i] = Math.random() * 5 + 0.5;
-            }
-
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-
-            const canvas = document.createElement('canvas');
-            canvas.width = 128; canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            gradient.addColorStop(0.1, 'rgba(255, 255, 255, 0.95)');
-            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
-            gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.4)');
-            gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0.1)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 128, 128);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const particlesMaterial = new THREE.PointsMaterial({
-                size: 4,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.9,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false,
-                map: texture,
-                sizeAttenuation: true
-            });
-
-            const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-            group.add(particles);
-
-            timelineScene.add(group);
-            return group;
-        }
-
-        function createEpochMarkers() {
-            timelineEpochs = [
-                { name: "Quantum Fluctuations", time: 0, years: "10⁻⁴³ seconds", position: 0, color: 0xFFFFFF, dataKey: 0 },
-                { name: "Inflation", time: 0.5, years: "10⁻³⁶ to 10⁻³² seconds", position: 10, color: 0xFFEFD5, dataKey: 0.5 },
-                { name: "Cosmic Microwave Background", time: 8, years: "375,000 years", position: 80, color: 0xFF8C42, dataKey: 8 },
-                { name: "Dark Ages", time: 15, years: "400,000 - 400M years", position: 150, color: 0x2A2A4A, dataKey: 15 },
-                { name: "First Stars", time: 30, years: "~400 million years", position: 300, color: 0xFFD700, dataKey: 30 },
-                { name: "Galaxy Formation", time: 50, years: "~1 billion years", position: 500, color: 0x6495ED, dataKey: 50 },
-                { name: "Solar System Birth", time: 70, years: "~9 billion years", position: 700, color: 0xFF6B35, dataKey: 70 },
-                { name: "Dark Energy Era", time: 85, years: "~10 billion years", position: 850, color: 0x9B59B6, dataKey: 85 },
-                { name: "Present Day", time: 100, years: "13.77 billion years", position: 1000, color: 0x00D9F5, dataKey: 100 }
-            ];
-
-            const markerGroup = new THREE.Group();
-
-            timelineEpochs.forEach((epoch, index) => {
-                const yPos = (epoch.time / 100 * 1000) - 500;
-                const radius = (epoch.time / 100) * 450;
-
-                const markerGeo = new THREE.SphereGeometry(10, 32, 32);
-                const markerMat = new THREE.MeshBasicMaterial({ color: epoch.color, transparent: true, opacity: 0.9 });
-                const marker = new THREE.Mesh(markerGeo, markerMat);
-                marker.position.set(radius, yPos, 0);
-                markerGroup.add(marker);
-
-                const ringGeo = new THREE.RingGeometry(12, 15, 32);
-                const ringMat = new THREE.MeshBasicMaterial({ color: 0x00D9F5, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false });
-                const ring = new THREE.Mesh(ringGeo, ringMat);
-                ring.position.copy(marker.position);
-                ring.rotation.x = Math.PI / 2;
-                markerGroup.add(ring);
-
-                const glowGeo = new THREE.SphereGeometry(16, 32, 32);
-                const glowMat = new THREE.MeshBasicMaterial({ color: epoch.color, transparent: true, opacity: 0.2, depthWrite: false });
-                const glow = new THREE.Mesh(glowGeo, glowMat);
-                glow.position.copy(marker.position);
-                markerGroup.add(glow);
-            });
-
-            timelineScene.add(markerGroup);
-        }
 
         // ==================== Solar System Initialization ====================
         const celestialData = {
@@ -1791,125 +1415,6 @@
             planet.add(moonGroup);
 
             celestialBodies[planetKey].moons.push({ moon: moon, group: moonGroup, angle: Math.random() * Math.PI * 2, data: moonData });
-        }
-
-        // ==================== Timeline Functions ====================
-        const epochsDetailedData = {
-            0: { title: "Quantum Fluctuations", description: "The Planck epoch - quantum foam of spacetime.", detailedInfo: "At the very beginning, the universe existed as a quantum singularity...", facts: ["Temperature: ~10³² Kelvin", "All four fundamental forces unified", "Gravity separates from other forces", "Quantum effects dominate spacetime", "Duration: 10⁻⁴³ seconds"], nextEvents: "The universe will undergo exponential inflation..." },
-            0.5: { title: "Inflation", description: "Exponential expansion of the universe.", detailedInfo: "In a fraction of a second, the universe expanded by a factor of at least 10²⁶...", facts: ["Duration: 10⁻³⁶ to 10⁻³² seconds", "Universe expands faster than light", "Creates quantum fluctuations that seed galaxies", "Explains cosmic flatness and uniformity", "Discovered by Alan Guth in 1980"], nextEvents: "After inflation, the universe enters a hot, dense state..." },
-            8: { title: "Cosmic Microwave Background", description: "Afterglow light from the Big Bang becomes visible.", detailedInfo: "Electrons combine with nuclei to form atoms...", facts: ["Age: ~375,000 years", "Temperature: ~3,000 Kelvin", "First atoms form", "Universe becomes transparent to light", "CMB discovered by Penzias and Wilson in 1965", "Nobel Prize in Physics 1978"], nextEvents: "The universe enters a dark age..." },
-            15: { title: "Dark Ages", description: "No stars yet - universe filled with neutral hydrogen.", detailedInfo: "A period of darkness between the CMB and first stars...", facts: ["Duration: 400,000 to 400 million years", "No light sources exist", "Dark matter begins forming structures", "Hydrogen gas cools and accumulates", "Seeds of future galaxies take shape", "Temperature drops to ~100 Kelvin"], nextEvents: "Gravity pulls hydrogen into dense clouds..." },
-            30: { title: "First Stars", description: "First generation of stars ignite the cosmos.", detailedInfo: "Population III stars - massive, short-lived...", facts: ["Age: ~400 million years", "Stars 100-1000x mass of our Sun", "No heavy elements yet", "Created first carbon, oxygen, iron", "Ended darkness with ultraviolet light", "Lifespan: ~3 million years"], nextEvents: "These massive stars will explode as supernovae..." },
-            50: { title: "Galaxy Formation", description: "Galaxies begin to form and cluster together.", detailedInfo: "Dark matter halos attracted gas and stars...", facts: ["Age: ~1 billion years", "First spiral and elliptical galaxies", "Supermassive black holes appear", "Galaxies cluster under gravity", "Heavy elements become abundant", "Star formation peaks"], nextEvents: "Galaxies continue growing through mergers..." },
-            70: { title: "Solar System Birth", description: "Our solar system forms from cosmic nebular cloud.", detailedInfo: "A cloud of gas and dust collapsed under gravity...", facts: ["Age: ~9 billion years (4.6 billion years ago)", "Formed from supernova debris", "Sun contains 99.86% of system mass", "8 planets, dwarf planets, asteroids", "Earth formed in habitable zone", "Moon formed from giant impact"], nextEvents: "Planets continue forming and migrating..." },
-            85: { title: "Dark Energy Era", description: "Dark energy dominates, accelerating expansion.", detailedInfo: "Around 5 billion years ago, dark energy began driving accelerated cosmic expansion...", facts: ["Age: ~10 billion years", "Dark energy: ~68% of universe", "Expansion accelerates", "Galaxies moving apart faster", "Universe will expand forever", "Discovered by Riess, Perlmutter, Schmidt"], nextEvents: "The universe will continue expanding..." },
-            100: { title: "Present Day", description: "Current era - age of observation and understanding.", detailedInfo: "We live 13.77 billion years after the Big Bang...", facts: ["Age: 13.77 billion years", "~2 trillion galaxies observable", "Humans evolved on Earth", "We can observe to 380,000 years after Big Bang", "Universe continues accelerating", "James Webb Space Telescope launched 2021"], nextEvents: "Stars will continue forming for trillions of years..." }
-        };
-
-        function updateTimelineElements(currentTime) {
-            const solarSystemY = (70 / 100 * 1000) - 500;
-            const solarSystemRadius = (70 / 100) * 450;
-            const galaxyY = (50 / 100 * 1000) - 500;
-            const galaxyRadius = (50 / 100) * 450;
-
-            const shouldShowPlanets = currentTime >= 70;
-            if (shouldShowPlanets && activePlanets.length === 0) {
-                // Add planets for timeline view
-                Object.keys(celestialData).forEach((key, i) => {
-                    if (key === 'sun') return;
-                    const pData = celestialData[key];
-                    const planetGeo = new THREE.SphereGeometry(pData.radius, 32, 32);
-                    const planetMat = new THREE.MeshBasicMaterial({ color: pData.color, transparent: true, opacity: 0.9 });
-                    const planet = new THREE.Mesh(planetGeo, planetMat);
-                    planet.position.set(solarSystemRadius + (i * 25), solarSystemY, 0);
-                    timelineScene.add(planet);
-                    activePlanets.push(planet);
-                });
-            } else if (!shouldShowPlanets && activePlanets.length > 0) {
-                activePlanets.forEach(planet => timelineScene.remove(planet));
-                activePlanets = [];
-            }
-
-            const shouldShowGalaxies = currentTime >= 50;
-            if (shouldShowGalaxies && activeGalaxies.length === 0) {
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const distance = 80 + Math.random() * 40;
-                    const galaxyGeo = new THREE.SphereGeometry(6 + Math.random() * 4, 16, 16);
-                    const galaxyMat = new THREE.MeshBasicMaterial({ color: 0x6495ED + Math.random() * 0x0000FF, transparent: true, opacity: 0.7 });
-                    const galaxy = new THREE.Mesh(galaxyGeo, galaxyMat);
-                    galaxy.position.set(galaxyRadius + Math.cos(angle) * distance, galaxyY + (Math.random() - 0.5) * 100, Math.sin(angle) * distance);
-                    timelineScene.add(galaxy);
-                    activeGalaxies.push(galaxy);
-                }
-            } else if (!shouldShowGalaxies && activeGalaxies.length > 0) {
-                activeGalaxies.forEach(galaxy => timelineScene.remove(galaxy));
-                activeGalaxies = [];
-            }
-        }
-
-        function updateEpochInfo(time) {
-            let currentEpoch = timelineEpochs[0];
-            for (let i = 0; i < timelineEpochs.length; i++) {
-                if (time >= timelineEpochs[i].time) {
-                    currentEpoch = timelineEpochs[i];
-                } else {
-                    break;
-                }
-            }
-
-            document.getElementById('epoch-title').textContent = currentEpoch.name;
-            document.getElementById('epoch-description').textContent = currentEpoch.description;
-
-            const data = epochsDetailedData[currentEpoch.dataKey];
-            if (data) {
-                document.getElementById('detailed-epoch-info').textContent = data.detailedInfo;
-                const factsList = document.getElementById('key-facts');
-                factsList.innerHTML = '';
-                data.facts.forEach(fact => {
-                    const li = document.createElement('li');
-                    li.textContent = fact;
-                    factsList.appendChild(li);
-                });
-                document.getElementById('next-events').textContent = data.nextEvents;
-            }
-
-            const timeDisplay = document.getElementById('time-display');
-            if (time < 1) {
-                timeDisplay.textContent = `Time: ${currentEpoch.years}`;
-            } else {
-                const years = (time / 100 * 13.77).toFixed(2);
-                timeDisplay.textContent = `Time: ${years} billion years after Big Bang`;
-            }
-
-            document.getElementById('timeline-slider').style.setProperty('--slider-value', `${time}%`);
-            updateTimelineElements(time);
-        }
-
-        function setupTimelineUI() {
-            const playBtn = document.getElementById('play-btn');
-            const pauseBtn = document.getElementById('pause-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const toggleLabelsBtn = document.getElementById('toggle-labels-btn');
-            const openSolarSystemBtn = document.getElementById('open-solar-system-btn');
-            const timeSlider = document.getElementById('timeline-slider');
-
-            playBtn.addEventListener('click', () => { isPlaying = true; });
-            pauseBtn.addEventListener('click', () => { isPlaying = false; });
-            resetBtn.addEventListener('click', () => {
-                currentTime = 0;
-                timeSlider.value = 0;
-                isPlaying = false;
-                lastEpochPlayed = -1;
-                updateEpochInfo(0);
-            });
-            toggleLabelsBtn.addEventListener('click', () => { labelsVisible = !labelsVisible; });
-            openSolarSystemBtn.addEventListener('click', () => switchView('solar-system'));
-            timeSlider.addEventListener('input', (e) => {
-                currentTime = parseFloat(e.target.value);
-                lastEpochPlayed = -1;
-                updateEpochInfo(currentTime);
-            });
         }
 
         // ==================== Solar System Functions ====================
@@ -2142,79 +1647,7 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ==================== Timeline Animation ====================
-        function animateTimeline() {
-            animationId = requestAnimationFrame(animateTimeline);
-
-            if (timelineControls) timelineControls.update();
-
-            if (isPlaying) {
-                currentTime += 0.02;
-                if (currentTime > 100) {
-                    currentTime = 100;
-                    isPlaying = false;
-                }
-                document.getElementById('timeline-slider').value = currentTime;
-
-                const newEpochIndex = timelineEpochs.findIndex((e, i) => {
-                    return currentTime >= e.time && (i === timelineEpochs.length - 1 || currentTime < timelineEpochs[i + 1].time);
-                });
-
-                if (newEpochIndex !== lastEpochPlayed) {
-                    lastEpochPlayed = newEpochIndex;
-                    updateEpochInfo(currentTime);
-                }
-            }
-
-            // Update shader time
-            if (timelineScene && timelineScene.children[0] && timelineScene.children[0].userData.coneMaterial) {
-                timelineScene.children[0].userData.coneMaterial.uniforms.time.value += 0.01;
-            }
-
-            // Rotate universe
-            if (timelineScene) {
-                timelineScene.rotation.y += 0.0001;
-            }
-
-            // Animate particles
-            if (timelineScene) {
-                const particles = timelineScene.children[2];
-                if (particles && particles.isPoints) {
-                    particles.rotation.y += 0.0001;
-                    particles.rotation.x += 0.00005;
-                }
-            }
-
-            // Camera movement
-            const time = Date.now() * 0.00005;
-            if (timelineCamera) {
-                timelineCamera.position.x = Math.sin(time * 0.8) * 15;
-                timelineCamera.position.y = 200 + Math.sin(time * 0.6) * 10;
-                timelineCamera.lookAt(0, 0, 0);
-            }
-
-            // Update markers
-            if (timelineScene) {
-                const markerGroup = timelineScene.children[1];
-                if (markerGroup) {
-                    markerGroup.rotation.y += 0.0001;
-                    markerGroup.children.forEach((child, i) => {
-                        if (child.isMesh && child.geometry.type === 'SphereGeometry' && child.material.opacity < 0.4) {
-                            const pulse = Math.sin(Date.now() * 0.001 + i * 0.25) * 0.1 + 1;
-                            child.scale.setScalar(pulse);
-                        }
-                    });
-                }
-            }
-
-            if (timelineRenderer && timelineCamera) {
-                timelineRenderer.render(timelineScene, timelineCamera);
-            }
-        }
-
         // ==================== Event Listeners ====================
-        document.getElementById('timeline-view-btn').addEventListener('click', () => switchView('timeline'));
-        document.getElementById('solar-system-view-btn').addEventListener('click', () => switchView('solar-system'));
 
         // Window resize
         window.addEventListener('resize', () => {
@@ -2247,8 +1680,8 @@
         let raycaster, mouse, touchStart;
 
         // Initialize timeline immediately
-        initTimeline();
-        animateTimeline();
+        initSolarSystem();
+        animateSolarSystem();
 
         // Handle DOM ready events
         window.addEventListener('DOMContentLoaded', () => {
