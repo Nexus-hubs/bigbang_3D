@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cosmic Timeline - Interactive 3D Journey (Silent Edition)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', Arial, sans-serif;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #000000 100%);
+            overflow: hidden;
+            color: #FFFFFF;
+            touch-action: none;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 181, 201, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(155, 89, 182, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Enhanced Controls - More Intuitive and Mobile-Friendly */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 15, 0.95);
+            padding: 18px 24px;
+            border-radius: 24px;
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            width: calc(100% - 40px);
+            max-width: 750px;
+            box-shadow: 0 12px 40px rgba(0, 181, 201, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #timeline-slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #1a1a2e 0%, #00B5C9 var(--slider-value, 0%), #1a1a2e var(--slider-value, 0%));
+            outline: none;
+            border-radius: 5px;
+            margin: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #timeline-slider::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 0;
+            right: 0;
+            height: 18px;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        #timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00B5C9, #00D9F5);
+            cursor: grab;
+            border-radius: 50%;
+            box-shadow: 0 0 24px rgba(0, 181, 201, 0.8), 0 0 48px rgba(0, 181, 201, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #timeline-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 32px rgba(0, 181, 201, 1), 0 0 64px rgba(0, 181, 201, 0.6);
+        }
+
+        #timeline-slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        #timeline-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00B5C9, #00D9F5);
+            cursor: grab;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 0 24px rgba(0, 181, 201, 0.8);
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00B5C9, #0095A8);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 181, 201, 0.3);
+            white-space: nowrap;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00D9F5, #00B5C9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 181, 201, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 181, 201, 0.3);
+        }
+
+        .time-display {
+            text-align: center;
+            color: #00D9F5;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 0 12px rgba(0, 217, 245, 0.6);
+            background: rgba(0, 217, 245, 0.05);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 217, 245, 0.2);
+            min-width: 200px;
+        }
+
+        /* Enhanced Info Panel - More Spacious and Readable */
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 10, 15, 0.95);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            backdrop-filter: blur(20px);
+            max-width: 340px;
+            z-index: 100;
+            box-shadow: 0 12px 40px rgba(0, 181, 201, 0.15);
+        }
+
+        #info-panel h2 {
+            color: #00D9F5;
+            margin-bottom: 16px;
+            font-size: 24px;
+            text-shadow: 0 0 12px rgba(0, 217, 245, 0.6);
+            font-weight: 700;
+        }
+
+        #info-panel p {
+            color: #E8E8E8;
+            line-height: 1.8;
+            font-size: 15px;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced Detailed Info Panel */
+        #detailed-info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 10, 15, 0.95);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            backdrop-filter: blur(20px);
+            max-width: 380px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 12px 40px rgba(0, 181, 201, 0.15);
+        }
+
+        #detailed-info-panel h3 {
+            color: #00D9F5;
+            margin-bottom: 16px;
+            font-size: 20px;
+            text-shadow: 0 0 12px rgba(0, 217, 245, 0.6);
+            font-weight: 700;
+        }
+
+        .info-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 181, 201, 0.2);
+        }
+
+        .info-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-section h4 {
+            color: #00B5C9;
+            font-size: 16px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-section p {
+            color: #C0C0C0;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            color: #B0B0B0;
+            font-size: 13px;
+            line-height: 1.8;
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 4px;
+        }
+
+        .info-list li:before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: #00B5C9;
+            font-size: 10px;
+        }
+
+        /* Enhanced Instructions - More Intuitive */
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(10, 10, 15, 0.95);
+            padding: 16px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 181, 201, 0.3);
+            backdrop-filter: blur(20px);
+            font-size: 13px;
+            color: #E8E8E8;
+            z-index: 100;
+            box-shadow: 0 12px 40px rgba(0, 181, 201, 0.15);
+            max-width: 180px;
+        }
+
+        #instructions div {
+            margin: 6px 0;
+            line-height: 1.5;
+        }
+
+        .instructions-title {
+            color: #00D9F5;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px rgba(0, 217, 245, 0.5);
+        }
+
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00D9F5;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 0 0 24px rgba(0, 217, 245, 0.8);
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: #00D9F5;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: loading-dots 1.5s infinite;
+        }
+
+        @keyframes loading-dots {
+            0%, 20% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+
+        /* Scrollbar Styling */
+        #detailed-info-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #detailed-info-panel::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.3);
+            border-radius: 3px;
+        }
+
+        #detailed-info-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 181, 201, 0.4);
+            border-radius: 3px;
+        }
+
+        #detailed-info-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 181, 201, 0.6);
+        }
+
+        /* Enhanced Mobile Responsive Design */
+        @media (max-width: 768px) {
+            #info-panel {
+                max-width: calc(100vw - 40px);
+                padding: 20px;
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                position: static;
+                margin: 0 15px;
+                order: -1;
+            }
+
+            #info-panel h2 {
+                font-size: 20px;
+            }
+
+            #info-panel p {
+                font-size: 14px;
+            }
+
+            #detailed-info-panel {
+                max-width: calc(100vw - 40px);
+                padding: 20px;
+                top: auto;
+                bottom: 180px;
+                right: 15px;
+                left: 15px;
+                max-height: 250px;
+                position: static;
+                margin: 15px;
+            }
+
+            #controls {
+                bottom: 15px;
+                width: calc(100% - 30px);
+                padding: 16px 20px;
+                gap: 14px;
+            }
+
+            .control-buttons {
+                gap: 6px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 13px;
+                min-width: 80px;
+            }
+
+            #instructions {
+                display: none; /* Hide on mobile to reduce clutter */
+            }
+
+            .time-display {
+                font-size: 14px;
+                min-width: 180px;
+            }
+
+
+            .audio-modal-content {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #controls {
+                padding: 14px 16px;
+            }
+
+            .control-buttons {
+                justify-content: center;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 70px;
+            }
+
+            .time-display {
+                font-size: 13px;
+                min-width: 160px;
+            }
+
+        }
+
+        /* Touch device optimization */
+        @media (hover: none) and (pointer: coarse) {
+            button {
+                min-height: 48px;
+                padding: 14px 20px;
+            }
+
+            #timeline-slider {
+                height: 12px;
+            }
+
+            #timeline-slider::-webkit-slider-thumb {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            #controls, #info-panel, #detailed-info-panel, #instructions {
+                border: 2px solid #00D9F5;
+                background: rgba(0, 0, 0, 0.95);
+            }
+        }
+
+        /* Focus styles for accessibility */
+        button:focus, input:focus {
+            outline: 2px solid #00D9F5;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <div class="loading">Initializing Universe...</div>
+    </div>
+
+    <div id="info-panel">
+        <h2 id="epoch-title">Big Bang</h2>
+        <p id="epoch-description">The beginning of space, time, and everything we know.</p>
+    </div>
+
+    <div id="detailed-info-panel">
+        <h3>Cosmic Insights</h3>
+        <div id="detailed-content">
+            <div class="info-section">
+                <h4>Current Epoch</h4>
+                <p id="detailed-epoch-info">Beginning of the universe from a singularity of infinite density and temperature.</p>
+            </div>
+            <div class="info-section">
+                <h4>Key Facts</h4>
+                <ul class="info-list" id="key-facts">
+                    <li>All matter and energy originated from this point</li>
+                    <li>Space itself began expanding</li>
+                    <li>Time started at this moment</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h4>What Happened Next</h4>
+                <p id="next-events">The universe rapidly expanded and cooled, leading to the formation of fundamental particles.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructions">
+        <div class="instructions-title">Controls</div>
+        <div>🖱️ Drag to rotate view</div>
+        <div>🔄 Scroll to zoom</div>
+        <div>⏯️ Use controls below</div>
+        <div>🪐 Animated planets</div>
+    </div>
+
+    <div id="controls">
+        <div class="control-row">
+            <div class="control-buttons">
+                <button id="play-btn">▶ Play</button>
+                <button id="pause-btn">⏸ Pause</button>
+                <button id="reset-btn">↻ Reset</button>
+                <button id="toggle-labels-btn">🏷️ Labels</button>
+            </div>
+            <div class="time-display" id="time-display">Time: 0 years after Big Bang</div>
+        </div>
+        <input type="range" id="timeline-slider" min="0" max="100" value="0" step="0.1">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+
+
+        // ============ ENHANCED EPOCH DATA WITH DETAILED INFO ============
+        const epochsDetailedData = {
+            0: {
+                title: "Quantum Fluctuations",
+                description: "The Planck epoch - quantum foam of spacetime.",
+                detailedInfo: "At the very beginning, the universe existed as a quantum singularity where space and time were not yet distinct. Quantum fluctuations at the Planck scale gave birth to the universe through a process of spontaneous creation.",
+                facts: [
+                    "Temperature: ~10³² Kelvin",
+                    "All four fundamental forces unified",
+                    "Gravity separates from other forces",
+                    "Quantum effects dominate spacetime",
+                    "Duration: 10⁻⁴³ seconds"
+                ],
+                nextEvents: "The universe will undergo exponential inflation, expanding faster than the speed of light and setting the stage for cosmic evolution."
+            },
+            0.5: {
+                title: "Inflation",
+                description: "Exponential expansion of the universe.",
+                detailedInfo: "In a fraction of a second, the universe expanded by a factor of at least 10²⁶, smoothing out irregularities and explaining the universe's uniformity. This rapid expansion created the conditions for matter formation.",
+                facts: [
+                    "Duration: 10⁻³⁶ to 10⁻³² seconds",
+                    "Universe expands faster than light",
+                    "Creates quantum fluctuations that seed galaxies",
+                    "Explains cosmic flatness and uniformity",
+                    "Discovered by Alan Guth in 1980"
+                ],
+                nextEvents: "After inflation, the universe enters a hot, dense state filled with elementary particles and radiation."
+            },
+            8: {
+                title: "Cosmic Microwave Background",
+                description: "Afterglow light from the Big Bang becomes visible.",
+                detailedInfo: "Electrons combine with nuclei to form atoms, making the universe transparent. Light from this era has been traveling through space for 13.8 billion years, now detected as microwave radiation at 2.7 Kelvin.",
+                facts: [
+                    "Age: ~375,000 years",
+                    "Temperature: ~3,000 Kelvin",
+                    "First atoms (hydrogen, helium) form",
+                    "Universe becomes transparent to light",
+                    "CMB discovered by Penzias and Wilson in 1965",
+                    "Nobel Prize in Physics 1978"
+                ],
+                nextEvents: "The universe enters a dark age with no light sources, only neutral hydrogen gas cooling in the darkness."
+            },
+            15: {
+                title: "Dark Ages",
+                description: "No stars yet - universe filled with neutral hydrogen.",
+                detailedInfo: "A period of darkness between the CMB and first stars. The universe expanded and cooled, filled only with neutral hydrogen and helium gas. This was a time of preparation for the cosmic dawn.",
+                facts: [
+                    "Duration: 400,000 to 400 million years",
+                    "No light sources exist",
+                    "Dark matter begins forming structures",
+                    "Hydrogen gas cools and accumulates",
+                    "Seeds of future galaxies take shape",
+                    "Temperature drops to ~100 Kelvin"
+                ],
+                nextEvents: "Gravity pulls hydrogen into dense clouds that will ignite as the first stars, ending the cosmic dark ages."
+            },
+            30: {
+                title: "First Stars",
+                description: "First generation of stars ignite the cosmos.",
+                detailedInfo: "Population III stars - massive, short-lived, and composed only of hydrogen and helium. These stellar furnaces forged the first heavy elements through nuclear fusion, beginning the process of cosmic enrichment.",
+                facts: [
+                    "Age: ~400 million years",
+                    "Stars 100-1000x mass of our Sun",
+                    "No heavy elements yet",
+                    "Created first carbon, oxygen, iron",
+                    "Ended darkness with ultraviolet light",
+                    "Lifespan: ~3 million years"
+                ],
+                nextEvents: "These massive stars will explode as supernovae, seeding space with heavy elements needed for planets and life."
+            },
+            50: {
+                title: "Galaxy Formation",
+                description: "Galaxies begin to form and cluster together.",
+                detailedInfo: "Dark matter halos attracted gas and stars, forming the first galaxies. Early galaxies were smaller and more chaotic than modern ones, often colliding and merging to form larger structures.",
+                facts: [
+                    "Age: ~1 billion years",
+                    "First spiral and elliptical galaxies",
+                    "Supermassive black holes appear",
+                    "Galaxies cluster under gravity",
+                    "Heavy elements become abundant",
+                    "Star formation peaks"
+                ],
+                nextEvents: "Galaxies continue growing through mergers and star formation, creating the cosmic web structure we observe today."
+            },
+            70: {
+                title: "Solar System Birth",
+                description: "Our solar system forms from cosmic nebular cloud.",
+                detailedInfo: "A cloud of gas and dust collapsed under gravity, forming our Sun and planets. Rocky planets formed close to the Sun, while gas giants formed farther out where ice could exist. This process took about 100 million years.",
+                facts: [
+                    "Age: ~9 billion years (4.6 billion years ago)",
+                    "Formed from supernova debris",
+                    "Sun contains 99.86% of system mass",
+                    "8 planets, dwarf planets, asteroids",
+                    "Earth formed in habitable zone",
+                    "Moon formed from giant impact"
+                ],
+                nextEvents: "Planets continue forming and migrating. Life will emerge on Earth in the next billion years."
+            },
+            85: {
+                title: "Dark Energy Era",
+                description: "Dark energy dominates, accelerating expansion.",
+                detailedInfo: "Around 5 billion years ago, dark energy began driving accelerated cosmic expansion. The universe's expansion started speeding up rather than slowing down as expected. This discovery earned the 2011 Nobel Prize.",
+                facts: [
+                    "Age: ~10 billion years",
+                    "Dark energy: ~68% of universe",
+                    "Expansion accelerates",
+                    "Galaxies moving apart faster",
+                    "Universe will expand forever",
+                    "Discovered by Riess, Perlmutter, Schmidt"
+                ],
+                nextEvents: "The universe will continue expanding, becoming colder and more diffuse over trillions of years."
+            },
+            100: {
+                title: "Present Day",
+                description: "Current era - age of observation and understanding.",
+                detailedInfo: "We live 13.77 billion years after the Big Bang, in a universe of 2 trillion galaxies. Humanity has developed technology to observe the cosmic microwave background and peer back to the dawn of time, unraveling the secrets of our cosmic origins.",
+                facts: [
+                    "Age: 13.77 billion years",
+                    "~2 trillion galaxies observable",
+                    "Humans evolved on Earth",
+                    "We can observe to 380,000 years after Big Bang",
+                    "Universe continues accelerating",
+                    "James Webb Space Telescope launched 2021"
+                ],
+                nextEvents: "Stars will continue forming for trillions of years, followed by an era of slowly dying stars and black holes in an expanding, cooling universe."
+            }
+        };
+
+        // ============ THREE.JS SCENE ============
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        scene.fog = new THREE.FogExp2(0x000000, 0.0008);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+        camera.position.set(0, 200, 400);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Remove loading screen
+        document.querySelector('.loading').remove();
+
+        // Cosmic epochs data
+        const epochs = [
+            { name: "Quantum Fluctuations", time: 0, years: "10⁻⁴³ seconds", position: 0, color: 0xFFFFFF, dataKey: 0 },
+            { name: "Inflation", time: 0.5, years: "10⁻³⁶ to 10⁻³² seconds", position: 10, color: 0xFFEFD5, dataKey: 0.5 },
+            { name: "Cosmic Microwave Background", time: 8, years: "375,000 years", position: 80, color: 0xFF8C42, dataKey: 8 },
+            { name: "Dark Ages", time: 15, years: "400,000 - 400M years", position: 150, color: 0x2A2A4A, dataKey: 15 },
+            { name: "First Stars", time: 30, years: "~400 million years", position: 300, color: 0xFFD700, dataKey: 30 },
+            { name: "Galaxy Formation", time: 50, years: "~1 billion years", position: 500, color: 0x6495ED, dataKey: 50 },
+            { name: "Solar System Birth", time: 70, years: "~9 billion years", position: 700, color: 0xFF6B35, dataKey: 70 },
+            { name: "Dark Energy Era", time: 85, years: "~10 billion years", position: 850, color: 0x9B59B6, dataKey: 85 },
+            { name: "Present Day", time: 100, years: "13.77 billion years", position: 1000, color: 0x00D9F5, dataKey: 100 }
+        ];
+
+        // Create enhanced universe cone
+        const createUniverseCone = () => {
+            const group = new THREE.Group();
+
+            // Main cone representing expanding universe
+            const segments = 64;
+            const geometry = new THREE.ConeGeometry(450, 1000, segments, 50, true);
+
+            // Enhanced gradient material
+            const material = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+
+                    void main() {
+                        float gradient = vPosition.y / 500.0 + 0.5;
+
+                        vec3 color1 = vec3(1.0, 1.0, 1.0); // White (early universe)
+                        vec3 color2 = vec3(1.0, 0.55, 0.26); // Orange (CMB)
+                        vec3 color3 = vec3(0.16, 0.16, 0.29); // Dark blue (dark ages)
+                        vec3 color4 = vec3(0.0, 0.85, 0.96); // Cyan (present)
+
+                        vec3 color;
+                        if (gradient < 0.08) {
+                            color = mix(color1, color2, gradient / 0.08);
+                        } else if (gradient < 0.25) {
+                            color = mix(color2, color3, (gradient - 0.08) / 0.17);
+                        } else {
+                            color = mix(color3, color4, (gradient - 0.25) / 0.75);
+                        }
+
+                        // Enhanced noise for texture
+                        float noise = fract(sin(dot(vUv * 150.0 + time * 0.05, vec2(12.9898, 78.233))) * 43758.5453);
+                        color += noise * 0.02;
+
+                        // Enhanced shimmer effect
+                        float shimmer = sin(time + vPosition.y * 0.05) * 0.01 + 0.99;
+                        color *= shimmer;
+
+                        // Enhanced transparency gradient
+                        float alpha = 0.6 + gradient * 0.3;
+
+                        gl_FragColor = vec4(color, alpha);
+                    }
+                `,
+                uniforms: {
+                    time: { value: 0 }
+                },
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            const cone = new THREE.Mesh(geometry, material);
+            cone.rotation.x = -Math.PI / 2;
+            cone.position.y = 0;
+            group.add(cone);
+            group.userData.coneMaterial = material;
+
+            // Enhanced wireframe overlay
+            const wireframeGeo = new THREE.ConeGeometry(453, 1000, 32, 20, true);
+            const wireframeMat = new THREE.MeshBasicMaterial({
+                color: 0x00D9F5,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.08
+            });
+            const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
+            wireframe.rotation.x = -Math.PI / 2;
+            group.add(wireframe);
+
+            // Enhanced particles for stars/galaxies
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 8000;
+            const positions = new Float32Array(particlesCount * 3);
+            const colors = new Float32Array(particlesCount * 3);
+            const sizes = new Float32Array(particlesCount);
+
+            for (let i = 0; i < particlesCount; i++) {
+                const t = Math.random();
+                const radius = t * 450;
+                const angle = Math.random() * Math.PI * 2;
+                const y = (t - 0.5) * 1000;
+
+                positions[i * 3] = Math.cos(angle) * radius * (0.9 + Math.random() * 0.2);
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = Math.sin(angle) * radius * (0.9 + Math.random() * 0.2);
+
+                // Enhanced color distribution
+                if (t < 0.15) {
+                    // Early universe - dark/dim
+                    colors[i * 3] = 0.15;
+                    colors[i * 3 + 1] = 0.15;
+                    colors[i * 3 + 2] = 0.25;
+                } else if (t < 0.5) {
+                    // Mid universe - warm colors
+                    colors[i * 3] = 0.6 + Math.random() * 0.4;
+                    colors[i * 3 + 1] = 0.4 + Math.random() * 0.3;
+                    colors[i * 3 + 2] = 0.2 + Math.random() * 0.2;
+                } else {
+                    // Recent universe - bright varied colors
+                    colors[i * 3] = 0.5 + Math.random() * 0.5;
+                    colors[i * 3 + 1] = 0.5 + Math.random() * 0.5;
+                    colors[i * 3 + 2] = 0.5 + Math.random() * 0.5;
+                }
+
+                // Enhanced size variation
+                sizes[i] = Math.random() * 5 + 0.5;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            // Enhanced particle texture
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.1, 'rgba(255, 255, 255, 0.95)');
+            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
+            gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.4)');
+            gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0.1)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+
+            const texture = new THREE.CanvasTexture(canvas);
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 4,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                map: texture,
+                sizeAttenuation: true
+            });
+
+            const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+            group.add(particles);
+
+            return group;
+        };
+
+        const universeCone = createUniverseCone();
+        scene.add(universeCone);
+
+        // Add epoch markers in 3D space
+        const markerGroup = new THREE.Group();
+        let labelsVisible = true;
+
+        epochs.forEach((epoch, index) => {
+            const yPos = (epoch.time / 100 * 1000) - 500;
+            const radius = (epoch.time / 100) * 450;
+
+            // Enhanced marker sphere
+            const markerGeo = new THREE.SphereGeometry(10, 32, 32);
+            const markerMat = new THREE.MeshBasicMaterial({
+                color: epoch.color,
+                transparent: true,
+                opacity: 0.9
+            });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.set(radius, yPos, 0);
+            markerGroup.add(marker);
+
+            // Enhanced ring
+            const ringGeo = new THREE.RingGeometry(12, 15, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0x00D9F5,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.6,
+                depthWrite: false
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(marker.position);
+            ring.rotation.x = Math.PI / 2;
+            markerGroup.add(ring);
+
+            // Enhanced glow
+            const glowGeo = new THREE.SphereGeometry(16, 32, 32);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: epoch.color,
+                transparent: true,
+                opacity: 0.2,
+                depthWrite: false
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.copy(marker.position);
+            markerGroup.add(glow);
+        });
+
+        // Planet data - will be added/removed based on timeline
+        const planetData = [
+            { name: 'Mercury', size: 4, color: 0x8C7853, distance: -40, speed: 0.024 },
+            { name: 'Venus', size: 6, color: 0xFFC649, distance: -60, speed: 0.018 },
+            { name: 'Earth', size: 6.5, color: 0x4A90E2, distance: -85, speed: 0.012 },
+            { name: 'Mars', size: 5, color: 0xE27B58, distance: -110, speed: 0.010 },
+            { name: 'Jupiter', size: 14, color: 0xD4A574, distance: -155, speed: 0.006 },
+            { name: 'Saturn', size: 11, color: 0xFAD5A5, distance: -200, speed: 0.005 },
+            { name: 'Uranus', size: 8, color: 0x4FD0E0, distance: -240, speed: 0.004 },
+            { name: 'Neptune', size: 8, color: 0x4166F5, distance: -280, speed: 0.003 }
+        ];
+
+        // Global arrays to track active elements
+        let activePlanets = [];
+        let activeGalaxies = [];
+
+        // Function to manage timeline-based elements
+        function updateTimelineElements(currentTime) {
+            const solarSystemY = (70 / 100 * 1000) - 500;
+            const solarSystemRadius = (70 / 100) * 450;
+            const galaxyY = (50 / 100 * 1000) - 500;
+            const galaxyRadius = (50 / 100) * 450;
+
+            // Planets appear at Solar System Birth epoch (time >= 70)
+            const shouldShowPlanets = currentTime >= 70;
+
+            if (shouldShowPlanets && activePlanets.length === 0) {
+                // Add planets
+                planetData.forEach((pData, i) => {
+                    const planetGeo = new THREE.SphereGeometry(pData.size, 32, 32);
+                    const planetMat = new THREE.MeshBasicMaterial({
+                        color: pData.color,
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    const planet = new THREE.Mesh(planetGeo, planetMat);
+                    planet.position.set(
+                        solarSystemRadius + pData.distance,
+                        solarSystemY,
+                        0
+                    );
+                    planet.userData = {
+                        speed: pData.speed,
+                        distance: pData.distance,
+                        baseRadius: solarSystemRadius,
+                        angle: Math.random() * Math.PI * 2,
+                        isPlanet: true
+                    };
+                    markerGroup.add(planet);
+
+                    // Enhanced planet glow
+                    const planetGlowGeo = new THREE.SphereGeometry(pData.size * 1.8, 32, 32);
+                    const planetGlowMat = new THREE.MeshBasicMaterial({
+                        color: pData.color,
+                        transparent: true,
+                        opacity: 0.15,
+                        depthWrite: false
+                    });
+                    const planetGlow = new THREE.Mesh(planetGlowGeo, planetGlowMat);
+                    planetGlow.position.copy(planet.position);
+                    planet.userData.glow = planetGlow;
+                    markerGroup.add(planetGlow);
+
+                    activePlanets.push({ planet, glow: planetGlow });
+                });
+            } else if (!shouldShowPlanets && activePlanets.length > 0) {
+                // Remove planets
+                activePlanets.forEach(({ planet, glow }) => {
+                    markerGroup.remove(planet);
+                    markerGroup.remove(glow);
+                });
+                activePlanets = [];
+            }
+
+            // Galaxy clusters appear at Galaxy Formation epoch (time >= 50)
+            const shouldShowGalaxies = currentTime >= 50;
+
+            if (shouldShowGalaxies && activeGalaxies.length === 0) {
+                // Add galaxy clusters
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const distance = 80 + Math.random() * 40;
+
+                    const galaxyGeo = new THREE.SphereGeometry(6 + Math.random() * 4, 16, 16);
+                    const galaxyMat = new THREE.MeshBasicMaterial({
+                        color: 0x6495ED + Math.random() * 0x0000FF,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+                    const galaxy = new THREE.Mesh(galaxyGeo, galaxyMat);
+                    galaxy.position.set(
+                        galaxyRadius + Math.cos(angle) * distance,
+                        galaxyY + (Math.random() - 0.5) * 100,
+                        Math.sin(angle) * distance
+                    );
+                    galaxy.userData = {
+                        isGalaxy: true,
+                        originalScale: 1,
+                        pulseSpeed: 0.5 + Math.random() * 0.5
+                    };
+                    markerGroup.add(galaxy);
+
+                    // Galaxy glow
+                    const galaxyGlowGeo = new THREE.SphereGeometry(12 + Math.random() * 6, 16, 16);
+                    const galaxyGlowMat = new THREE.MeshBasicMaterial({
+                        color: galaxyMat.color,
+                        transparent: true,
+                        opacity: 0.2,
+                        depthWrite: false
+                    });
+                    const galaxyGlow = new THREE.Mesh(galaxyGlowGeo, galaxyGlowMat);
+                    galaxyGlow.position.copy(galaxy.position);
+                    markerGroup.add(galaxyGlow);
+
+                    activeGalaxies.push({ galaxy, glow: galaxyGlow });
+                }
+            } else if (!shouldShowGalaxies && activeGalaxies.length > 0) {
+                // Remove galaxies
+                activeGalaxies.forEach(({ galaxy, glow }) => {
+                    markerGroup.remove(galaxy);
+                    markerGroup.remove(glow);
+                });
+                activeGalaxies = [];
+            }
+        }
+
+        scene.add(markerGroup);
+
+        // Enhanced lighting
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.4);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xFFFFFF, 1.5, 3000);
+        pointLight.position.set(0, 500, 500);
+        scene.add(pointLight);
+
+        const pointLight2 = new THREE.PointLight(0x00D9F5, 0.8, 3000);
+        pointLight2.position.set(0, -500, -500);
+        scene.add(pointLight2);
+
+        const pointLight3 = new THREE.PointLight(0x9B59B6, 0.5, 2500);
+        pointLight3.position.set(-500, 0, 0);
+        scene.add(pointLight3);
+
+        // Enhanced mouse and touch controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotation = { x: 0, y: 0 };
+        let momentum = { x: 0, y: 0 };
+        const damping = 0.95;
+
+        // Mouse events
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+            momentum = { x: 0, y: 0 };
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                rotation.y += deltaX * 0.005;
+                rotation.x += deltaY * 0.005;
+
+                momentum.x = deltaX * 0.002;
+                momentum.y = deltaY * 0.002;
+
+                rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x));
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Touch events for mobile
+        let touchStartPos = { x: 0, y: 0 };
+        let lastTouchTime = 0;
+
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            lastTouchTime = Date.now();
+            momentum = { x: 0, y: 0 };
+        }, { passive: false });
+
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (isDragging && e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+                rotation.y += deltaX * 0.008;
+                rotation.x += deltaY * 0.008;
+
+                momentum.x = deltaX * 0.003;
+                momentum.y = deltaY * 0.003;
+
+                rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x));
+
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        }, { passive: false });
+
+        renderer.domElement.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isDragging = false;
+
+            // Add momentum on touch end
+            const animateMomentum = () => {
+                if (Math.abs(momentum.x) > 0.001 || Math.abs(momentum.y) > 0.001) {
+                    rotation.y += momentum.x;
+                    rotation.x += momentum.y;
+
+                    momentum.x *= damping;
+                    momentum.y *= damping;
+
+                    rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x));
+
+                    requestAnimationFrame(animateMomentum);
+                }
+            };
+            animateMomentum();
+        }, { passive: false });
+
+        // Enhanced zoom with smooth transitions
+        let targetZoom = camera.position.z;
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY * 0.8;
+            targetZoom += delta;
+            targetZoom = Math.max(200, Math.min(1000, targetZoom));
+        }, { passive: false });
+
+        // Audio system for soft button sounds
+        let audioContext = null;
+        let masterGainNode = null;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGainNode = audioContext.createGain();
+                masterGainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Very quiet
+                masterGainNode.connect(audioContext.destination);
+            } catch (e) {
+                console.warn('Web Audio API not supported');
+            }
+        }
+
+        function playSoftClick() {
+            if (!audioContext) return;
+
+            // Create a soft, pleasant click sound
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(masterGainNode);
+
+            // Soft sine wave with slight pitch variation
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.05);
+
+            // Quick envelope
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        // Initialize audio on first user interaction
+        function initAudioOnInteraction() {
+            if (!audioContext) {
+                initAudio();
+            }
+            document.removeEventListener('click', initAudioOnInteraction);
+            document.removeEventListener('touchstart', initAudioOnInteraction);
+        }
+
+        document.addEventListener('click', initAudioOnInteraction);
+        document.addEventListener('touchstart', initAudioOnInteraction);
+
+        // Animation controls
+        let isPlaying = false;
+        let currentTime = 0;
+        const timeSlider = document.getElementById('timeline-slider');
+        const timeDisplay = document.getElementById('time-display');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const toggleLabelsBtn = document.getElementById('toggle-labels-btn');
+
+
+        let lastEpochPlayed = -1;
+
+
+        function updateDetailedInfo(time) {
+            let currentEpoch = epochs[0];
+            for (let i = 0; i < epochs.length; i++) {
+                if (time >= epochs[i].time) {
+                    currentEpoch = epochs[i];
+                } else {
+                    break;
+                }
+            }
+
+            const dataKey = currentEpoch.dataKey;
+            const data = epochsDetailedData[dataKey];
+
+            if (data) {
+                document.getElementById('detailed-epoch-info').textContent = data.detailedInfo;
+
+                const factsList = document.getElementById('key-facts');
+                factsList.innerHTML = '';
+                data.facts.forEach(fact => {
+                    const li = document.createElement('li');
+                    li.textContent = fact;
+                    factsList.appendChild(li);
+                });
+
+                document.getElementById('next-events').textContent = data.nextEvents;
+            }
+        }
+
+        function updateEpochInfo(time) {
+            let currentEpoch = epochs[0];
+            let epochIndex = 0;
+            for (let i = 0; i < epochs.length; i++) {
+                if (time >= epochs[i].time) {
+                    currentEpoch = epochs[i];
+                    epochIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            document.getElementById('epoch-title').textContent = currentEpoch.name;
+            document.getElementById('epoch-description').textContent = currentEpoch.description;
+
+            // Update detailed info panel
+            updateDetailedInfo(time);
+
+            // Update time display
+            if (time < 1) {
+                timeDisplay.textContent = `Time: ${currentEpoch.years}`;
+            } else {
+                const years = (time / 100 * 13.77).toFixed(2);
+                timeDisplay.textContent = `Time: ${years} billion years after Big Bang`;
+            }
+
+            // Update slider background gradient
+            timeSlider.style.setProperty('--slider-value', `${time}%`);
+
+            // Update timeline-based elements
+            updateTimelineElements(time);
+
+        }
+
+        playBtn.addEventListener('click', () => {
+            playSoftClick();
+            isPlaying = true;
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            playSoftClick();
+            isPlaying = false;
+        });
+
+        resetBtn.addEventListener('click', () => {
+            playSoftClick();
+            currentTime = 0;
+            timeSlider.value = 0;
+            isPlaying = false;
+            lastEpochPlayed = -1;
+            updateEpochInfo(0);
+        });
+
+        toggleLabelsBtn.addEventListener('click', () => {
+            playSoftClick();
+            labelsVisible = !labelsVisible;
+            markerGroup.visible = labelsVisible;
+        });
+
+
+        timeSlider.addEventListener('input', (e) => {
+            currentTime = parseFloat(e.target.value);
+            lastEpochPlayed = -1;
+            updateEpochInfo(currentTime);
+        });
+
+        // Enhanced animation loop
+        let animationFrameId;
+        let animationTime = 0;
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            animationTime += 0.01;
+
+            if (isPlaying) {
+                currentTime += 0.02;
+                if (currentTime > 100) {
+                    currentTime = 100;
+                    isPlaying = false;
+                }
+                timeSlider.value = currentTime;
+
+                const newEpochIndex = epochs.findIndex((e, i) => {
+                    return currentTime >= e.time && (i === epochs.length - 1 || currentTime < epochs[i + 1].time);
+                });
+
+                if (newEpochIndex !== lastEpochPlayed) {
+                    updateEpochInfo(currentTime);
+                }
+            }
+
+            // Smooth zoom interpolation
+            camera.position.z += (targetZoom - camera.position.z) * 0.05;
+
+            // Update shader time
+            if (universeCone.userData.coneMaterial) {
+                universeCone.userData.coneMaterial.uniforms.time.value = animationTime;
+            }
+
+            // Rotate universe
+            universeCone.rotation.y = rotation.y;
+            universeCone.rotation.x = rotation.x;
+
+            markerGroup.rotation.y = rotation.y;
+            markerGroup.rotation.x = rotation.x;
+
+            // Animate particles with gentle rotation
+            const particles = universeCone.children[2];
+            if (particles && particles.isPoints) {
+                particles.rotation.y += 0.0001;
+                particles.rotation.x += 0.00005;
+            }
+
+            // Enhanced gentle camera sway
+            const time = Date.now() * 0.00005;
+            camera.position.x = Math.sin(time * 0.8) * 15;
+            camera.position.y = 200 + Math.sin(time * 0.6) * 10;
+            camera.lookAt(0, 0, 0);
+
+            // Update marker glows, planets, and galaxies with enhanced animations
+            markerGroup.children.forEach((child, i) => {
+                if (child.isMesh) {
+                    // Animate glows with pulsing
+                    if (child.geometry && child.geometry.type === 'SphereGeometry' &&
+                        child.material.opacity < 0.4) {
+                        const pulse = Math.sin(animationTime * 0.75 + i * 0.25) * 0.1 + 1;
+                        child.scale.setScalar(pulse);
+                    }
+
+                    // Animate planets in orbit with enhanced realism
+                    if (child.userData && child.userData.speed && child.userData.isPlanet) {
+                        child.userData.angle += child.userData.speed * 0.005;
+                        const orbitRadius = Math.abs(child.userData.distance);
+                        child.position.x = child.userData.baseRadius + Math.cos(child.userData.angle) * orbitRadius;
+                        child.position.z = Math.sin(child.userData.angle) * orbitRadius;
+
+                        // Rotate planet on its axis
+                        child.rotation.y += 0.004;
+
+                        // Update glow position
+                        if (child.userData.glow) {
+                            child.userData.glow.position.copy(child.position);
+                            child.userData.glow.rotation.copy(child.rotation);
+                        }
+                    }
+
+                    // Animate galaxies with gentle pulsing
+                    if (child.userData && child.userData.isGalaxy) {
+                        const pulse = Math.sin(animationTime * child.userData.pulseSpeed * 0.5) * 0.15 + 1;
+                        child.scale.setScalar(pulse);
+
+                        // Update glow position and scale
+                        if (child.userData.glow) {
+                            child.userData.glow.position.copy(child.position);
+                            child.userData.glow.scale.setScalar(pulse * 1.2);
+                        }
+                    }
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+        updateEpochInfo(0);
+        updateTimelineElements(0);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            cancelAnimationFrame(animationFrameId);
+        });
+
+        // Enhanced window resize handling
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+    </script>
+</body>
+</html>
