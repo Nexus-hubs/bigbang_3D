@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Big Bang 3D</title>
+    <meta http-equiv="refresh" content="0; url=cosmic-timeline-3.html" />
+  </head>
+  <body>
+    <p>Loading Big Bang 3D…</p>
+  </body>
+</html>
