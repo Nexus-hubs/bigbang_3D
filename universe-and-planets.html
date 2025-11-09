@@ -1204,7 +1204,7 @@
             <div id="instructions">
                 <div class="instructions-title">Controls</div>
                 <div>🖱️ Drag to rotate view</div>
-                <div>🔄 Scroll to zoom</div>
+                <div>🔄 Scroll / Pinch to zoom</div>
                 <div>⏯️ Use controls below</div>
                 <div>🪐 Planets at Solar System epoch</div>
             </div>
@@ -1397,6 +1397,7 @@
             timelineControls.dampingFactor = 0.05;
             timelineControls.minDistance = 200;
             timelineControls.maxDistance = 1000;
+            timelineControls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
             // Create universe
             createUniverseCone();
